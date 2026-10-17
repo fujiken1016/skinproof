@@ -16,6 +16,12 @@
   <p class="hint">Real YouCam scores, but the retakes are <b>simulated</b> (small shift, zoom, exposure, noise and JPEG changes) from 5 public-domain portraits, not real handheld sessions. The rule's noise prior was fitted on one face; the numbers below are on the <b>4 other faces</b>, where nothing changed between "before" and "after". How often did each rule claim a change anyway?</p>
   <div class="stats" id="study" aria-live="polite"></div>
   <p class="hint">Read it as "much lower false alarms in our test", not as an accuracy claim: 5 people, simulated retakes, comparisons within a face overlap. Even a plain 3-point threshold does well here; what SkinProof adds is that the threshold adapts to each concern and to your own retakes.</p>
+  <p class="hint" id="study2"></p>
+  <h3>Where a fixed 3-point rule breaks depends on the person</h3>
+  <table class="mini"><tr><th scope="col">Score and face</th><th scope="col">Fixed 3-point rule</th><th scope="col">SkinProof</th></tr>
+  <tr><td>Acne, face A</td><td>43.7% false</td><td>1.9%</td></tr><tr><td>Pores, face A</td><td>21.1% false</td><td>4.4%</td></tr>
+  <tr><td>Firmness, 4 other faces</td><td>16.7% false</td><td>0%</td></tr><tr><td>Texture, 4 other faces</td><td>6.5% false</td><td>0.9%</td></tr></table>
+  <p class="hint">Face A is the face the noise prior was fitted on. On the other faces, different scores were the jumpy ones. A single fixed threshold cannot be right for everyone; measuring your own retakes can.</p>
 </section>
 
 <section class="card" aria-labelledby="h-demo">
@@ -41,7 +47,10 @@
   <label class="shot" id="a1"><input type="file" accept="image/*" capture="user"><span>Follow-up photo 2</span></label></div>
   <button id="judge" disabled>Judge it</button><p id="msg2" class="msg" role="status"></p></div>
 </section>
-<section id="s-nolive" class="card" hidden><h2>Use your own photos</h2><p class="hint">This hosted demo has no API key on purpose (keys never ship to a browser). Run it yourself: <code>YOUCAM_API_KEY=... node server.js</code>. See the README.</p></section>
+<section id="s-nolive" class="card" hidden><h2>Use your own photos</h2><p class="hint">This hosted page replays recorded results because a key must never ship to a browser. To try your own photos: <code>git clone</code> the repo and run <code>node server.js</code> (no key needed: MOCK scores walk you through the full 2+2 photo flow). With a key, <code>YOUCAM_API_KEY=... node server.js</code> runs live YouCam Skin Analysis. See the README.</p></section>
+
+<section class="card" aria-labelledby="h-shop"><h2 id="h-shop">For shops: a measurement badge</h2>
+  <p class="hint">Brands already show before/after photos. <a href="shop-demo/">The shop demo</a> turns a brand's own 2+2 photo set into a badge: "N of 12 scores moved beyond measurement noise" or "No clear change beyond noise". It uses the same pure function, about 10 lines to embed.</p></section>
 
 <section class="card" aria-labelledby="h-how">
   <h2 id="h-how">How the YouCam API is used</h2>

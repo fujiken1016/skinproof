@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shop demo: SkinProof measurement badge</title>
+<style>
+:root{--bg:#faf8f5;--fg:#201c18;--mut:#5b534b;--card:#fff;--line:#e2dbd2;--acc:#1b6a50;--okbg:#e4f3ec;--neubg:#eceff1;--neu:#4b5563;--ok:#17603f}
+@media(prefers-color-scheme:dark){:root{--bg:#161412;--fg:#f1ece6;--mut:#b5aca2;--card:#1f1c19;--line:#352f2a;--acc:#6fd3a8;--okbg:#17332a;--neubg:#2a2d30;--neu:#b4bec7;--ok:#6fd3a8}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}main{max-width:680px;margin:0 auto;padding:16px 16px 48px}
+.note{font-size:13px;color:var(--mut);border:1px dashed var(--line);border-radius:8px;padding:8px 12px}
+.product{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}.product h1{font-size:24px;margin:0}.price{font-size:20px;font-weight:700}
+.pics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.pics figure{margin:0;font-size:13px;color:var(--mut)}.pics img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 25%;border-radius:8px;border:1px solid var(--line)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.tabs button{min-height:48px;padding:0 16px;border:2px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:600 15px system-ui;cursor:pointer}.tabs button[aria-selected=true]{border-color:var(--acc);color:var(--acc)}
+.badge{border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0;background:var(--neubg)}.badge.yes{background:var(--okbg);border-color:var(--ok)}.badge b{font-size:18px;display:block}.badge small{color:var(--mut);display:block;margin-top:4px}
+details{margin-top:8px}summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:600}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px 4px;border-top:1px solid var(--line);text-align:left}
+pre{overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px}a{color:var(--acc)}
+</style></head><body><main>
+<p class="note">Shop demo, fictional product. A brand supplies its own before/after photos; the shop page shows how much of the visible change is beyond measurement noise. The badge describes score measurements. It is not a claim about the product. Photos: CC0 portrait with simulated edits, <a href="../">see credits</a>.</p>
+<section class="product" aria-labelledby="p">
+  <h1 id="p">Demo Serum 30 ml (fictional)</h1><p class="price">$00.00</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="pics" id="pics"></div>
+  <div class="badge" id="badge" role="status" aria-live="polite"></div>
+  <details><summary>Measurement details (12 YouCam Skin Analysis scores)</summary><table id="tbl"></table></details>
+</section>
+<section class="product"><h2 style="margin-top:0;font-size:18px">Embed it (about 10 lines)</h2>
+<pre>import { judge, summarize } from './verdict.js';   // pure function, no dependencies
+// before / after: two YouCam raw_score maps each (two retakes per time point)
+const rows = judge(before, after);                   // per-concern verdict + noise + threshold
+const beyond = rows.filter(r =&gt; r.verdict === 'improved' || r.verdict === 'worse').length;
+badge.textContent = beyond ? beyond + ' of ' + rows.length + ' scores moved beyond noise'
+                           : 'No clear change beyond measurement noise';</pre>
+<p style="font-size:14px;color:var(--mut)">Cost per badge: 4 photos, about 56 units at the 14 units per photo we measured (see README); the brand pays once per before/after set, not per shopper.</p></section>
+</main><script type="module">
+import { judge } from '../verdict.js';
+const $ = (id) => document.getElementById(id);
+const SCN = [
+  { label: 'Set 1 (nothing changed)', b: ['retake_0', 'retake_1'], a: ['retake_2', 'retake_3'], t: 'Brand photo set' },
+  { label: 'Set 2 (simulated edit)', b: ['retake_0', 'retake_1'], a: ['better_0', 'better_1'], t: 'Edited' }];
+const res = await fetch('../demo/results.json').then((r) => r.json());
+function show(s) {
+  const rows = judge(s.b.map((n) => res[n]), s.a.map((n) => res[n]));
+  $('pics').innerHTML = [['Before 1', s.b[0]], ['Before 2', s.b[1]], ['After 1', s.a[0]], ['After 2', s.a[1]]].map(([c, n]) => `<figure><img src="../demo/${n}.jpg" alt="${c}"><figcaption>${c}</figcaption></figure>`).join('');
+  const beyond = rows.filter((r) => r.verdict === 'improved' || r.verdict === 'worse');
+  $('badge').className = 'badge' + (beyond.length ? ' yes' : '');
+  $('badge').innerHTML = beyond.length
+    ? `<b>${beyond.length} of ${rows.length} scores moved beyond measurement noise</b><small>${beyond.map((r) => r.label + (r.delta > 0 ? ' +' : ' ') + r.delta).join(', ')}. A score change is not proof that a product works.</small>`
+    : `<b>No clear change beyond measurement noise</b><small>Visible differences between the photos are within the retake noise.</small>`;
+  $('tbl').innerHTML = '<tr><th>Score</th><th>Change</th><th>Needs more than</th></tr>' + rows.map((r) => `<tr><td>${r.label}</td><td>${r.delta > 0 ? '+' : ''}${r.delta}</td><td>&plusmn;${r.needed}</td></tr>`).join('');
+}
+$('tabs').replaceChildren(...SCN.map((s, i) => { const b = document.createElement('button'); b.role = 'tab'; b.textContent = s.label; b.setAttribute('aria-selected', i === 0);
+  b.onclick = () => { [...$('tabs').children].forEach((x) => x.setAttribute('aria-selected', x === b)); show(s); }; return b; }));
+show(SCN[0]);
+</script></body></html>

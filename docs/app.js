@@ -22,6 +22,7 @@ function study(s) {
     <div class="stat bad"><b>${o.naive3}%</b><span>if only 3+ point moves count</span></div>
     <div class="stat hero"><b>${o.skinproof}%</b><span>SkinProof rule (2 x retake noise)</span></div>
     <div class="stat"><b>${nf} faces</b><span>${o.n.toLocaleString()} no-change comparisons on 4 held-out faces</span></div>`;
+  if (s.london_holdout) $('study2').textContent = `Fully held out: ${s.london_holdout.faces} more people from a CC BY 4.0 research photo set (${s.london_holdout.n} comparisons): ${s.london_holdout.naive1}% / ${s.london_holdout.naive3}% / ${s.london_holdout.skinproof}% for the same three rules. That is 1 false alarm in ${s.london_holdout.n} for SkinProof; the sample is small.`;
 }
 function tabs() {
   $('tabs').replaceChildren(...SCN.map((s, i) => { const b = document.createElement('button'); b.role = 'tab'; b.textContent = s.label; b.setAttribute('aria-selected', i === 0);
@@ -45,7 +46,7 @@ function render(t, el) {
     const sign = r.delta > 0 ? '+' : '';
     return `<div class="row"><div class="top"><span>${r.label}</span><span class="pill v-${r.verdict}">${ico[r.verdict]}${lab[r.verdict]}</span></div>
       <div class="bar" aria-hidden="true"><b style="left:${Math.max(0, 50 - r.needed)}%;width:${Math.min(100, r.needed * 2)}%"></b><i style="left:calc(${Math.max(1, Math.min(99, 50 + r.delta))}% - 2px)"></i></div>
-      <small>${r.before} to ${r.after} (${sign}${r.delta}). Needs more than ±${r.needed} to count. Noise ${r.noise} from ${r.noiseFrom}.</small></div>`; }).join('');
+      <small>${r.before} to ${r.after} (${sign}${r.delta})</small><details><summary>Details</summary><small>Needs more than ±${r.needed} to count. Noise ${r.noise} from ${r.noiseFrom}.</small></details></div>`; }).join('');
   const flag = rows.filter((r) => r.verdict === 'worse' || r.verdict === 'no_clear_change').slice(0, 3);
   const nxt = NEXT;
   const next = `<h3>What to do next</h3><ul id="next">${flag.length ? flag.map((r) => `<li><b>${r.label}.</b> ${nxt[r.type] || ''}</li>`).join('') : '<li>Nothing flagged. Keep your routine steady and re-check in a few weeks.</li>'}</ul>`;

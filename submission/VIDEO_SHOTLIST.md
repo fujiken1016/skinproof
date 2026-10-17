@@ -18,6 +18,13 @@ Target 2:00 to 2:30 (rules: 1 to 3 min, judges stop at 3:00; YouTube public; mus
 | 1:55-2:15 | One diagram frame: Photo, /file, PUT, /task/skin-analysis, poll, raw_score, verdict (static is OK here, 4 s). Then terminal `npm test` for 3 s | "Upload, skin analysis task, poll, raw score. The key stays on the server. The decision rule is a tested function." |
 | 2:15-2:30 | "What it will not claim" card, then URL card held 6 s: fujiken1016.github.io/skinproof and the repo | "Cosmetic tracking, not a medical device. Photos go to YouCam and SkinProof does not keep them. Try it at the link." |
 
+## R2 changes for the video owner
+- Phone column: make the browser capture fill the full frame height (about 1000px wide, zoom 140%); add a 4-second zoom-in on the "Redness: Score fell" row and on the Acne row.
+- Acne beat (slow, 4 to 5 s, show the grey noise band with the tick inside it): "Acne moved four points. On this face acne wanders by more than that, so SkinProof says: no clear change."
+- Replace "jumpy" with "noisy". Pauses of 0.8 s before "No clear change" and "Beyond the noise". Listen through once and rewrite any stiff sentence.
+- Add 10 s after the live runs: use scene ("Mina, three weeks in, one before and one after photo; SkinProof says no clear change, re-check in two weeks"; mark it "illustrative") and the shop badge page (`/shop-demo/`): "A shop can show the same measurement next to its before/after photos."
+- Say "recorded in a second take" over the follow-up. Captions 2 lines of 28 characters. URL card held 6 to 8 s.
+
 ## Must-haves checklist
 - [ ] Live run: file picker, previews, real wait, results, in one continuous capture.
 - [ ] Says "YouCam Skin Analysis API" aloud and shows the endpoint flow.

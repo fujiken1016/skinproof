@@ -2,7 +2,7 @@
 // Enforced by test/claims.test.js. Not medical advice.
 export const NEXT = {
   acne: 'Acne scores vary a lot between retakes. Re-check in the same light on the same day of your routine, and note what changed. Persistent, painful or spreading breakouts: talk to a dermatologist or pharmacist.',
-  redness: 'If this score rose after you started something new, pause the new product and re-check in a few days. Burning, swelling or pain: stop and see a clinician.',
+  redness: 'If this score fell after something new, re-check in a few days before drawing a conclusion. Burning, swelling or pain: stop and see a clinician.',
   oiliness: 'This score moves with time of day and washing. Retake at the same hour, same light, before judging.',
   moisture: 'This score moves with washing and weather. Retake at the same time of day, then compare.',
   pore: 'Pores score noisily. Judge over several weeks of same-condition photos, not days.',

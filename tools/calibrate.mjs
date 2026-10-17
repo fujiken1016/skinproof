@@ -4,6 +4,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const A = JSON.parse(readFileSync('demo/results.json')), Fz = JSON.parse(readFileSync('demo/results_faces.json'));
 const faces = { A: [...Array(8).keys()].map((i) => A['retake_' + i]) };
 for (const k of ['f1', 'f10', 'f21', 'f28']) faces[k] = Object.entries(Fz).filter(([n, v]) => n.startsWith(k + '_') && !v.error).map(([, v]) => v);
+const lond = {}; const LM = JSON.parse(readFileSync('demo/london_meta.json'));
+for (const k of Object.keys(LM)) { const R = Object.entries(Fz).filter(([n, v]) => n.startsWith('f' + k + '_') && !v.error).map(([, v]) => v); if (R.length >= 4) lond[k] = R; }
 const types = Object.keys(faces.A[0]);
 const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
 const sdOf = (R) => Object.fromEntries(types.map((t) => { const v = R.map((m) => m[t]), m = mean(v); return [t, Math.sqrt(mean(v.map((x) => (x - m) ** 2)))]; }));
@@ -27,6 +29,9 @@ out.out_of_sample = {}; let tot = { n: 0, naive1: 0, naive3: 0, measuredOnly: 0,
 for (const k of ['f1', 'f10', 'f21', 'f28']) { const r = rate(faces[k], priorA); out.out_of_sample[k] = r; for (const m in tot) tot[m] += k === 'x' ? 0 : (m === 'n' ? r.n : r[m] * r.n / 100); }
 out.out_of_sample_total = { n: tot.n, ...Object.fromEntries(['naive1', 'naive3', 'measuredOnly', 'skinproof'].map((m) => [m, +(100 * tot[m] / tot.n).toFixed(1)])) };
 out.pooled_prior_all_faces = (() => { let t2 = { n: 0, naive1: 0, naive3: 0, measuredOnly: 0, skinproof: 0 }; for (const k in faces) { const r = rate(faces[k], pooled); for (const m in t2) t2[m] += m === 'n' ? r.n : r[m] * r.n / 100; } return { n: t2.n, ...Object.fromEntries(['naive1', 'naive3', 'measuredOnly', 'skinproof'].map((m) => [m, +(100 * t2[m] / t2.n).toFixed(1)])) }; })();
+// Fully held-out: London Set faces (CC BY 4.0), scored with the SHIPPED pooled prior (fit on the 5 CC0 faces only).
+out.london_holdout = (() => { let t2 = { n: 0, naive1: 0, naive3: 0, measuredOnly: 0, skinproof: 0 }; for (const k in lond) { const r = rate(lond[k], pooled); for (const m in t2) t2[m] += m === 'n' ? r.n : r[m] * r.n / 100; }
+  return { faces: Object.keys(lond).length, n: t2.n, ...Object.fromEntries(['naive1', 'naive3', 'measuredOnly', 'skinproof'].map((m) => [m, +(100 * t2[m] / t2.n).toFixed(1)])) }; })();
 console.log(JSON.stringify({ ...out, sd_by_face: undefined }, null, 1));
 console.log('PRIOR (pooled)', JSON.stringify(out.prior_sd_pooled));
 console.log('SD ratio max/min pooled', (Math.max(...Object.values(pooled)) / Math.min(...Object.values(pooled))).toFixed(0));
