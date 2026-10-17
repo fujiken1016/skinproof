@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SkinProof</title><link rel="stylesheet" href="style.css"></head>
+<body><main>
+<header><h1>SkinProof</h1><p class="sub">Did that product actually work? Measured by YouCam Skin AI, judged against your own retake noise.</p>
+<p id="mode" class="badge" hidden></p></header>
+
+<section id="s-new" class="card">
+  <h2>1. What are you testing?</h2>
+  <label>Product or routine <input id="name" maxlength="60" placeholder="e.g. new niacinamide serum"></label>
+  <p class="hint">Take <b>two photos back to back</b>, same light, face centred, no makeup. The gap between them is your noise floor: it stops a lucky shot from fooling you.</p>
+  <div class="shots"><label class="shot" id="b0"><input type="file" accept="image/*" capture="user"><span>Baseline photo 1</span></label>
+  <label class="shot" id="b1"><input type="file" accept="image/*" capture="user"><span>Baseline photo 2</span></label></div>
+  <button id="save" disabled>Analyse and save baseline</button>
+  <p id="msg1" class="msg" role="status"></p>
+</section>
+
+<section id="s-trials" class="card" hidden><h2>Your trials</h2><ul id="trials"></ul></section>
+
+<section id="s-follow" class="card" hidden>
+  <h2>2. Re-check after using it</h2><p class="hint" id="fhint"></p>
+  <div class="shots"><label class="shot" id="a0"><input type="file" accept="image/*" capture="user"><span>Follow-up photo 1</span></label>
+  <label class="shot" id="a1"><input type="file" accept="image/*" capture="user"><span>Follow-up photo 2</span></label></div>
+  <button id="judge" disabled>Judge it</button><p id="msg2" class="msg" role="status"></p>
+</section>
+
+<section id="s-result" class="card" hidden><h2 id="rtitle">Result</h2><p id="headline" class="headline"></p>
+  <div id="rows"></div><h3>What to do next</h3><ul id="next"></ul></section>
+
+<footer><p id="disc"></p><p>Photos are sent for analysis and never stored by this app. Only scores are kept, in this browser.
+<button id="wipe" class="link">Delete all my data</button></p></footer>
+</main><script type="module" src="app.js"></script></body></html>
