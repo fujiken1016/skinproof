@@ -32,3 +32,6 @@ Target 2:00 to 2:30 (rules: 1 to 3 min, judges stop at 3:00; YouTube public; mus
 - [ ] No API key, no env file, no author face, no personal name in frame (check the browser tab bar and bookmarks).
 - [ ] URL on screen at least 6 s at the end; captions burned in, 28 characters per line, split at phrases.
 - [ ] Social bonus cut (30 s): tag @YouCam API, include "Received API credits for sharing".
+
+## Copied from winners' videos (reviews/ROLE_MODELS_VIDEO2.md, opened 2026-10-17)
+Open on a concrete problem line within 2 s; burned-in captions with one big headline per scene; show the live app plus real API steps; end card 8 to 10 s with tagline, QR codes (demo / repo) and readable URLs; same links and chapter timestamps in the YouTube description; show the YouCam credit early; 2:20 to 3:00 is the winners' range.
