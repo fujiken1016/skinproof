@@ -12,7 +12,7 @@ const ROOT = fileURLToPath(new URL('./public/', import.meta.url));
 const KEY = process.env.YOUCAM_API_KEY || '';
 const MOCK = process.env.MOCK === '1' || !KEY;
 const PORT = Number(process.env.PORT || 8787);
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.jpg': 'image/jpeg' };
 let busy = 0;
 
 function readBody(req, limit = 6e6) {

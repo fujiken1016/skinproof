@@ -1,3 +1,14 @@
-{ "name": "skinproof", "version": "0.1.0", "type": "module", "license": "MIT",
-  "description": "Did your skincare product actually work? Measured with YouCam Skin AI, judged against your own retake noise.",
-  "scripts": { "test": "node --test test/*.test.js", "start": "node server.js", "mock": "MOCK=1 node server.js" } }
+{
+ "name": "skinproof",
+ "version": "0.1.0",
+ "type": "module",
+ "license": "MIT",
+ "description": "Did your skincare product actually work? Measured with YouCam Skin AI, judged against your own retake noise.",
+ "scripts": {
+  "test": "node --test test/*.test.js",
+  "start": "node server.js",
+  "mock": "MOCK=1 node server.js",
+  "pages": "node tools/build_pages.mjs",
+  "calibrate": "node tools/calibrate.mjs"
+ }
+}

@@ -1,32 +1,63 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SkinProof</title><link rel="stylesheet" href="style.css"></head>
+<title>SkinProof: did that product actually work?</title>
+<meta name="description" content="SkinProof uses YouCam Skin AI and your own retake noise to say whether a skincare product worked, or honestly that it cannot tell yet.">
+<link rel="stylesheet" href="style.css"></head>
 <body><main>
-<header><h1>SkinProof</h1><p class="sub">Did that product actually work? Measured by YouCam Skin AI, judged against your own retake noise.</p>
-<p id="mode" class="badge" hidden></p></header>
+<header>
+  <p class="eyebrow">Built on the YouCam Skin Analysis API</p>
+  <h1>Did that product <em>actually</em> work?</h1>
+  <p class="lead">Two photos of the same face, seconds apart, already score differently. SkinProof measures that wobble first, then only says <b>improved</b> or <b>worse</b> when the change is bigger than it. Otherwise it tells you the truth: <b>no clear change yet</b>.</p>
+  <p id="mode" class="badge" hidden></p>
+</header>
 
-<section id="s-new" class="card">
-  <h2>1. What are you testing?</h2>
+<section class="card" aria-labelledby="h-study">
+  <h2 id="h-study">The problem, measured</h2>
+  <p class="hint">We ran 8 handheld-style retakes of one portrait through YouCam Skin Analysis (12 concerns, 2,520 before/after comparisons where <u>nothing changed</u>). How often did each rule claim a change that did not happen?</p>
+  <div class="stats" id="study" aria-live="polite"></div>
+</section>
+
+<section class="card" aria-labelledby="h-demo">
+  <h2 id="h-demo">See it judge (real YouCam results, recorded)</h2>
+  <p class="hint">Every number below came from a live YouCam API call. Baseline = 2 retakes. Follow-up = 2 more. Pick what happened between them.</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <p id="scn-note" class="hint"></p>
+  <div class="thumbs" id="thumbs"></div>
+  <div id="result" aria-live="polite"></div>
+</section>
+
+<section id="s-live" class="card" hidden aria-labelledby="h-live">
+  <h2 id="h-live">Try it with your own photos</h2>
   <label>Product or routine <input id="name" maxlength="60" placeholder="e.g. new niacinamide serum"></label>
-  <p class="hint">Take <b>two photos back to back</b>, same light, face centred, no makeup. The gap between them is your noise floor: it stops a lucky shot from fooling you.</p>
+  <p class="hint">Take <b>two photos back to back</b>: same light, face centred (60 to 80% of the frame), neutral expression, no makeup.</p>
   <div class="shots"><label class="shot" id="b0"><input type="file" accept="image/*" capture="user"><span>Baseline photo 1</span></label>
   <label class="shot" id="b1"><input type="file" accept="image/*" capture="user"><span>Baseline photo 2</span></label></div>
-  <button id="save" disabled>Analyse and save baseline</button>
-  <p id="msg1" class="msg" role="status"></p>
-</section>
-
-<section id="s-trials" class="card" hidden><h2>Your trials</h2><ul id="trials"></ul></section>
-
-<section id="s-follow" class="card" hidden>
-  <h2>2. Re-check after using it</h2><p class="hint" id="fhint"></p>
+  <button id="save" disabled>Analyse and save baseline</button><p id="msg1" class="msg" role="status"></p>
+  <ul id="trials"></ul>
+  <div id="s-follow" hidden><h3>Re-check after using it</h3><p class="hint" id="fhint"></p>
   <div class="shots"><label class="shot" id="a0"><input type="file" accept="image/*" capture="user"><span>Follow-up photo 1</span></label>
   <label class="shot" id="a1"><input type="file" accept="image/*" capture="user"><span>Follow-up photo 2</span></label></div>
-  <button id="judge" disabled>Judge it</button><p id="msg2" class="msg" role="status"></p>
+  <button id="judge" disabled>Judge it</button><p id="msg2" class="msg" role="status"></p></div>
+</section>
+<section id="s-nolive" class="card" hidden><h2>Use your own photos</h2><p class="hint">This hosted demo has no API key on purpose (keys never ship to a browser). Run it yourself: <code>YOUCAM_API_KEY=... node server.js</code>. See the README.</p></section>
+
+<section class="card" aria-labelledby="h-how">
+  <h2 id="h-how">How the YouCam API is used</h2>
+  <ol class="how">
+    <li><code>POST /s2s/v2.0/file</code> then <code>PUT</code> to the pre-signed URL (photo is sent once, never stored by SkinProof).</li>
+    <li><code>POST /s2s/v2.0/task/skin-analysis</code> with 12 SD concerns (<code>acne, redness, oiliness, moisture, pore, texture, wrinkle, age_spot, radiance, dark_circle_v2, eye_bag, firmness</code>), <code>format: json</code>.</li>
+    <li>Poll <code>GET /task/skin-analysis/{task_id}</code> and read <code>raw_score</code> per concern. One check is 4 photos, about 14 units each.</li>
+    <li><b>The rule:</b> noise = the larger of your two retake gaps, a 2-point floor, and that concern's measured SD (acne and pores are jumpy). A change counts only if it exceeds <b>2 x noise</b>.</li>
+  </ol>
+  <p class="hint">The API key stays on the server. The decision logic is a pure, unit-tested function you can read in <code>verdict.js</code>.</p>
 </section>
 
-<section id="s-result" class="card" hidden><h2 id="rtitle">Result</h2><p id="headline" class="headline"></p>
-  <div id="rows"></div><h3>What to do next</h3><ul id="next"></ul></section>
-
-<footer><p id="disc"></p><p>Photos are sent for analysis and never stored by this app. Only scores are kept, in this browser.
-<button id="wipe" class="link">Delete all my data</button></p></footer>
+<section class="card" aria-labelledby="h-lim">
+  <h2 id="h-lim">What it will not claim</h2>
+  <ul class="how"><li>It is a cosmetic self-tracking tool, not a medical device. It cannot diagnose anything.</li>
+  <li>Scores depend on light, angle and makeup. The noise study is one face under simulated retakes; your noise may differ, which is why your own retakes are measured too.</li>
+  <li>Most concerns change over weeks, not days. The demo follow-ups are <b>simulated edits</b> of a CC0 photo to exercise the logic, not evidence that any product works.</li></ul>
+</section>
+<footer><p id="disc"></p><p>Demo photo: CC0 portrait, see <a href="https://github.com/fujiken1016/skinproof/blob/main/demo/CREDITS.md">credits</a>. MIT licensed, <a href="https://github.com/fujiken1016/skinproof">source on GitHub</a>.
+<button id="wipe" class="link" hidden>Delete all my data</button></p></footer>
 </main><script type="module" src="app.js"></script></body></html>

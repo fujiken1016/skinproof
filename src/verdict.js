@@ -11,6 +11,11 @@ export const ACTIONS = Object.keys(CONCERNS);
 
 const NOISE_FLOOR = 2.0;   // score points; never trust a gap smaller than this
 const K = 2.0;             // change must exceed K x noise
+// Per-concern retake SD measured on the REAL YouCam API: 8 simulated handheld retakes of one CC0 portrait
+// (tools/calibrate.mjs, demo/results.json). Two retakes can look identical by luck, so a concern known to
+// be jumpy (acne SD 4.6, pores 2.7) never gets a smaller noise estimate than this. One face, one lighting.
+export const PRIOR_SD = { eye_bag: 0.3, acne: 4.57, dark_circle_v2: 0.55, firmness: 0.17, pore: 2.66, oiliness: 0.49,
+  age_spot: 0.16, texture: 0.08, wrinkle: 0.24, radiance: 0.49, redness: 0.62, moisture: 0.5 };
 
 const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
 
@@ -31,7 +36,10 @@ export function judge(before, after) {
     const b = before.map((m) => m[type]).filter((x) => typeof x === 'number');
     const a = after.map((m) => m[type]).filter((x) => typeof x === 'number');
     if (b.length < 2 || a.length < 2) continue;
-    const noise = Math.max(NOISE_FLOOR, Math.abs(b[0] - b[1]), Math.abs(a[0] - a[1]));
+    const measured = Math.max(Math.abs(b[0] - b[1]), Math.abs(a[0] - a[1]));   // your own retake gap
+    const prior = PRIOR_SD[type] || 0;
+    const noise = Math.max(NOISE_FLOOR, measured, prior);
+    const noiseFrom = noise === measured && measured > Math.max(NOISE_FLOOR, prior) ? 'your retakes' : prior > NOISE_FLOOR && noise === prior ? 'known jumpy concern' : 'minimum floor';
     const delta = mean(a) - mean(b);                       // higher score = healthier
     const needed = K * noise;
     let verdict = 'no_clear_change';
@@ -40,7 +48,7 @@ export function judge(before, after) {
     else if (delta >= needed) verdict = 'improved';
     else if (delta <= -needed) verdict = 'worse';
     rows.push({ type, label: CONCERNS[type], before: round(mean(b)), after: round(mean(a)),
-      delta: round(delta), noise: round(noise), needed: round(needed), verdict });
+      delta: round(delta), noise: round(noise), noiseFrom, needed: round(needed), verdict });
   }
   rows.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
   return rows;
