@@ -1,6 +1,6 @@
 **Tagline:** An error bar for your skin score: YouCam Skin AI that says "no clear change yet" when that is the honest answer.
 
-**In one line:** In our internal test (real YouCam scores on simulated retakes), a rule that reports any 1-point move claimed a change that never happened on average 22.9% of the time per held-out face (range 14.6% to 27.8%); SkinProof's rule did so 0.1% (range 0% to 0.6%) on those 4 faces. Limits are listed below. SkinProof makes no claim that any product works.
+**In one line:** Average per held-out face, a rule that reports any 1-point move claims a change that never happened 22.9% of the time; SkinProof's rule, 0.1%. Simulated retakes, 4 faces, details in the tables and limits. SkinProof makes no claim that any product works.
 
 **YouCam API used:** Skin Analysis (SD, 12 concerns, `format: json`; 14 units per photo per the official docs).
 **Try it:** keyless replay of real recorded results https://fujiken1016.github.io/skinproof/ , shop-page badge demo https://fujiken1016.github.io/skinproof/shop-demo/ , code https://github.com/fujiken1016/skinproof . Your own photos in about 2 minutes: clone, then `node server.js` (Node 22, no install; no key = MOCK scores so you can walk the whole flow; `YOUCAM_API_KEY=... node server.js` = live YouCam). Steps are in the README.
@@ -19,9 +19,9 @@ Unlike a tracker that subtracts two scores, it will not report a difference smal
 ## Technological Implementation
 - Flow: `POST /s2s/v2.0/file`, `PUT` to the pre-signed URL, `POST /s2s/v2.0/task/skin-analysis` (12 SD concerns), poll the task, read `raw_score`. The key stays on the server; the hosted page has no key.
 - Quirks we hit and handle: `all`, `skin_age`, `resize_image` entries carry no `raw_score`; `error_large_face_angle`, `error_src_face_too_small`, `error_src_face_out_of_bound` reject photos (not charged), so the app guides framing.
-- Pure, unit-tested decision logic (`verdict.js`, 18 tests) plus a claims linter that fails the build on medical, ingredient or efficacy wording in all user-facing files; CI runs both.
+- Pure, unit-tested decision logic (`verdict.js`, 25 tests across 3 files) plus a claims linter that fails the build on medical, ingredient or efficacy wording in all user-facing files; CI runs both.
 - Internal noise test: real-API scores of one CC0 portrait (8 photos) plus 4 more CC0 portraits as held-out faces. "Retakes" are simulated (shift, zoom, exposure, noise, JPEG; no rotation or perspective change). The face, not the comparison, is the unit (comparisons inside a face overlap). Per held-out CC0 face, average (range): any-1-point rule 22.9% (14.6 to 27.8), 3-point rule 2.0% (0 to 4.4), SkinProof 0.1% (0 to 0.6). Adding 3 people from a CC BY 4.0 research set as a secondary supplement (7 faces, bootstrap over faces): 22.2% (17.3 to 27.2), 2.3% (0.9 to 3.9), 0.5% (0 to 1.3). On the face the prior was fitted on: 17.1%, 8.1%, 0.4% (in-sample). Seven or eight people and simulated retakes: read it as "much lower false alarms in our test", not an accuracy claim.
-- Weakest spot, disclosed: pores. SkinProof's false-alarm rate for pores is its highest (4.4% on the fitted face) because the pooled noise prior is small, and in the red-cast demo pores also move. A colour cast changes how pores read; both are measurement changes, not claims about skin.
+- Pores, a decision we made: pores had the highest false-alarm rate, so pores now get a higher minimum noise (3 points instead of 2; `tools/pores_tradeoff.mjs`). On the fitted face pore false alarms fell from 6.7% to 2.4% (0% on the other faces either way). The cost is power: a red-cast shift of 4.7 pore points, which was a verdict before, is now shown as "close to the line". In the red-cast demo only Redness gets a verdict; Pores moves too (a colour cast changes how pores read) but stays below it.
 - Quality gate (`src/quality.js`, pure function, tested): checks size, exposure and blur in the browser before a photo is sent, saving units. Verdicts also carry a margin and a confidence tier (confident, borderline, clearly inside noise, cannot judge); borderline rows show "close to the line".
 - Cost: one check is 4 photos = 56 units (14 per photo). 43 successful analyses (about 600 units) went into the whole project.
 
@@ -47,9 +47,12 @@ One flow: consent, two photos, baseline, re-check, verdict. "No clear change" is
 - Simulated retakes only. We searched for a public dataset with real same-session retakes of the same person under a license that allows commercial and research use (Face Research Lab London Set, Chicago Face Database, FEI, CaNAFF, MUCT, Caltech Faces, Wikimedia Commons and others). None qualified: the only clearly licensed one (London Set, CC BY 4.0) has one neutral photo per person, and the rest are research-only or unverifiable. Our own face photos were deliberately not used. Real handheld retakes remain untested; the protocol (`tools/HANDHELD_PROTOCOL.md`) and measurement script (`tools/jitter_measure.py`) are ready, need no face and no API credit, and the script is verified on our simulated retakes.
 - Demo follow-ups are simulated edits of a CC0 photo and imply nothing about the person shown. London Set faces (CC BY 4.0) were sent to YouCam for scoring and are not redistributed; the participants' consent text covers research and media use, which may be narrower than a commercial API call, so these results are secondary and the headline numbers use CC0 faces only.
 - The demo's baseline and follow-up photos were taken on the same day; the screen says so. A real follow-up should wait two weeks or more.
+- Fairness: the 8 faces are not a representative sample of skin tones or ages, so the noise prior may not transfer; we did not label skin tones. The bar is measured per person (your own retake gap always counts and can only raise the bar). Skin Tone Analysis is not used.
+- Review: we prepared a 3-question review request for a skincare professional (`tools/EXPERT_REVIEW_QUESTIONS.md`); none has been received, and we quote nobody.
 - The noise prior is a rough guide fitted on simulated retakes; your own retake gap always counts.
 
-## Not built yet
-Skin Tone Analysis to widen the noise bar in hard light; a study with consented real retakes.
+## Next, and why it is not here
+- Skin Tone Analysis to widen the bar in hard light: not built because the free API credits were used up on the validation study; the browser quality gate (exposure, blur, size) is the credit-free step in that direction.
+- Real handheld retakes with consented volunteers: not done because it needs consent and time; instead a faceless handheld-jitter measurement (`tools/HANDHELD_PROTOCOL.md`, `tools/jitter_measure.py`, `tools/gate_eval.py`) checks whether our simulated jitter covers real jitter. Result: <pending, filled in when the photos are measured>.
 
 Built with: YouCam Skin Analysis API, Node 22 (no dependencies), vanilla JS, GitHub Pages. Photo credits in `demo/CREDITS.md`.

@@ -19,9 +19,9 @@
   <p class="hint" id="study2"></p>
   <h3>Where a fixed 3-point rule breaks depends on the person</h3>
   <table class="mini"><tr><th scope="col">Score and face</th><th scope="col">Fixed 3-point rule</th><th scope="col">SkinProof</th></tr>
-  <tr><td>Acne, face A (prior fitted here)</td><td>43.7% false</td><td>1.9%</td></tr><tr><td>Pores, face A (prior fitted here)</td><td>21.1% false</td><td>4.4%</td></tr>
+  <tr><td>Acne, face A (prior fitted here)</td><td>43.7% false</td><td>1.9%</td></tr><tr><td>Pores, face A (prior fitted here)</td><td>21.1% false</td><td>1.6%</td></tr>
   <tr><td>Firmness, 4 other faces</td><td>16.7% false</td><td>0%</td></tr><tr><td>Texture, 4 other faces</td><td>6.5% false</td><td>0.9%</td></tr></table>
-  <p class="hint">Face A is the face the noise prior was fitted on, so its numbers flatter SkinProof. Pores are SkinProof's weakest score (4.4% there, because the pooled prior is small). On the other faces, different scores were the jumpy ones. A single fixed threshold cannot be right for everyone; measuring your own retakes can.</p>
+  <p class="hint">Face A is the face the noise prior was fitted on, so its numbers flatter SkinProof. Pores had the highest false-alarm rate, so they now get a higher minimum noise (3 points): 4.4% became 1.6% there, at the cost of some power. On the other faces, different scores were the jumpy ones. A single fixed threshold cannot be right for everyone; measuring your own retakes can.</p>
 </section>
 
 <section class="card" aria-labelledby="h-demo">

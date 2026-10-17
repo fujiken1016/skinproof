@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { judge, summarize, toMap, PRIOR_SD } from '../src/verdict.js';
+import { judge, summarize, toMap, PRIOR_SD, MIN_NOISE } from '../src/verdict.js';
 
 const m = (o) => o;
 test('clear improvement beyond noise', () => {
@@ -47,4 +47,12 @@ test('confidence tiers', () => {
   assert.equal(edge.confidence, 'borderline');
   const inside = judge([m({ moisture: 50 }), m({ moisture: 50 })], [m({ moisture: 51 }), m({ moisture: 51 })])[0];
   assert.equal(inside.confidence, 'clearly_inside_noise');
+});
+
+test('pores need a higher minimum noise (3), others keep 2', () => {
+  assert.equal(MIN_NOISE.pore, 3);
+  const p = judge([m({ pore: 80 }), m({ pore: 80 })], [m({ pore: 74 }), m({ pore: 74 })])[0];   // -6 vs needed 2*3
+  assert.equal(p.verdict, 'worse'); assert.equal(p.needed, 6);
+  const q = judge([m({ pore: 80 }), m({ pore: 80 })], [m({ pore: 75.3 }), m({ pore: 75.3 })])[0];
+  assert.equal(q.verdict, 'no_clear_change'); assert.equal(q.confidence, 'borderline');
 });

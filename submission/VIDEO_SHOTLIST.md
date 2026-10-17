@@ -45,3 +45,13 @@ Open on a concrete problem line within 2 s; burned-in captions with one big head
 6. Voice: someone listens through once. Say "Acne varies more than that on this face". Pause 0.8 s before "No clear change".
 7. Captions: split at phrases; fix the double space in "so it says  no clear change". Voice "Second take: real YouCam scores, simulated follow-up photos" and add the chip "recorded earlier".
 8. Show the photo preview appearing right after selection (one keyframe).
+
+## R4 list for the video owner (edits and short captures, no API credit needed)
+1. Quality gate demo (5 to 6 s, new): run `node server.js` (MOCK is fine, the gate runs in the browser), pick a dark photo and a blurred photo; "Too dark" and "Looks blurry" appear and nothing is sent. On screen: "no API call: the gate runs in the browser". Voice: "Before anything is sent, a quality gate rejects dark or blurry photos, so units are not wasted."
+2. Second reader (6 to 8 s, new, replaces part of the Mina card): the shop-demo badge plus the 3-row regulator table, chip "ILLUSTRATIVE". Voice: "A shop's compliance reviewer sees one number with its noise attached." Mina shrinks to 8 s.
+3. Fewer still frames in the last 45 s: in the shop demo, show the cursor pressing Set 1 then Set 2 and hold the two badge states for 2 s each; heading "Badge: 2 of 12 beyond noise"; scroll so the tile is not cut at the eyes.
+4. Pores (changed): in the red-cast scene only Redness is a verdict now; Pores is "No clear change (close to the line)". Voice: "Redness fell far beyond the noise. Pores moved too, because a red cast changes how pores read, but not enough to call." Regenerate that audio line only.
+5. Numbers: 22.9% and 0.1% average per held-out face (4 faces); merge the "Four held-out faces" card into the number card and hold 3 s.
+6. Voice: a person listens once; add `|0.8|` pauses before "no clear change" and "beyond the noise"; or record a human voice and replace `audio.wav`.
+7. Overlaps: move the TIME SKIP chip away from the "4x speed" chip; keep the "All tests pass" caption off the last line of the terminal; show a photo preview appearing right after a file is chosen.
+8. Test count if shown: 25.

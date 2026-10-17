@@ -11,6 +11,9 @@ export const ACTIONS = Object.keys(CONCERNS);
 
 const NOISE_FLOOR = 2.0;   // score points; never trust a gap smaller than this
 const K = 2.0;             // change must exceed K x noise
+// Pores had the highest false-alarm rate (tools/pores_tradeoff.mjs: 6.7% -> 2.4% on the fitted face, 0% elsewhere either way),
+// so pores get a higher minimum noise. Cost: a red-cast shift of 4.7 pore points is now "close to the line", not a verdict.
+export const MIN_NOISE = { pore: 3.0 };
 // Per-concern retake SD measured on the REAL YouCam API: simulated handheld retakes (shift/zoom/exposure/noise/JPEG)
 // of 5 different CC0 portraits, 29 photos (tools/calibrate.mjs; data demo/results*.json). Pooled as RMS across faces.
 // SD differs a lot by person (texture 0.08 on one face, ~2 on another), so this is only a prior: the user's own retake
@@ -39,8 +42,9 @@ export function judge(before, after) {
     if (b.length < 2 || a.length < 2) continue;
     const measured = Math.max(Math.abs(b[0] - b[1]), Math.abs(a[0] - a[1]));   // your own retake gap
     const prior = PRIOR_SD[type] || 0;
-    const noise = Math.max(NOISE_FLOOR, measured, prior);
-    const noiseFrom = noise === measured && measured > Math.max(NOISE_FLOOR, prior) ? 'your retakes' : prior > NOISE_FLOOR && noise === prior ? 'known jumpy concern' : 'minimum floor';
+    const floor = Math.max(NOISE_FLOOR, MIN_NOISE[type] || 0);
+    const noise = Math.max(floor, measured, prior);
+    const noiseFrom = noise === measured && measured > Math.max(floor, prior) ? 'your retakes' : prior > floor && noise === prior ? 'known jumpy concern' : 'minimum floor';
     const delta = mean(a) - mean(b);                       // higher score = healthier
     const needed = K * noise;
     let verdict = 'no_clear_change';

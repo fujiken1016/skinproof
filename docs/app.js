@@ -13,7 +13,7 @@ $('disc').textContent = DISCLAIMER;
 const SCN = [
   { id: 'none', label: 'Nothing changed', note: 'Same scene, 2 fresh retakes. A good tool should say "no clear change".', before: ['retake_0', 'retake_1'], after: ['retake_2', 'retake_3'], tag: 'Follow-up' },
   { id: 'better', label: 'Smoother follow-up (simulated)', note: 'SIMULATED: follow-up photos are a soft-smoothed edit of the same photo. Exercises the "improved" path. Not evidence that any product works.', before: ['retake_0', 'retake_1'], after: ['better_0', 'better_1'], tag: 'Edited' },
-  { id: 'worse', label: 'Redder follow-up (simulated)', note: 'SIMULATED: follow-up photos get a red colour cast. Redness fell as expected; Pores also fell because a colour cast changes how pores read. Both are measurement changes, not claims about skin.', before: ['retake_0', 'retake_1'], after: ['worse_0', 'worse_1'], tag: 'Edited' }];
+  { id: 'worse', label: 'Redder follow-up (simulated)', note: 'SIMULATED: follow-up photos get a red colour cast. Redness fell as expected. Pores moved too (a colour cast changes how pores read) but stay close to the line, below a verdict. These are measurement changes, not claims about skin.', before: ['retake_0', 'retake_1'], after: ['worse_0', 'worse_1'], tag: 'Edited' }];
 let results = null;
 Promise.all([fetch('demo/results.json').then((r) => r.json()), fetch('demo/study.json').then((r) => r.json()), fetch('demo/per_face.json').then((r) => r.json())]).then(([r, st, pf]) => { results = r; study(st, pf); tabs(); pickScn(SCN[0]); }).catch(() => {});
 

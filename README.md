@@ -29,15 +29,15 @@ People ask "is this serum working?" right when they are about to rebuy. One befo
 3. **Your own photos, live YouCam API:** `YOUCAM_API_KEY=your_key node server.js` (key from the YouCam API console; free units cover about 70 photos). Open http://localhost:8787 , tick the consent box, add 2 baseline photos (front-facing, face 60 to 80% of the frame, same light), then 2 follow-up photos. Your key stays on your machine; photos go only to YouCam.
 - Not offered: a hosted version that accepts anyone's photos. It would put a paid key behind a public endpoint, so we chose a keyless replay instead.
 
-## Self-score against the R3 panel (reviews/R3_panel.md), 2026-10-18
-Panel R3: 7.7. Fixed here without API credits: the pores explanation, ASA wording quoted from the page, same-day demo label, shop price, per-face statistics with intervals and the in-sample note, London results demoted to a supplement, client-side quality gate and confidence tiers, handheld-jitter protocol and script. Still open: YouTube URL (author), real handheld data (needs a phone session; protocol ready), video edits (`submission/VIDEO_SHOTLIST.md`, R3 list), Skin Tone (needs credits). Estimate if the video list is done: about 8.0.
+## Self-score
+Latest panel: R4, 8.1 (see `reviews/R1_panel.md` to `R4_panel.md` for the history, 6.4 to 8.1). Done without API credits in this pass: test count (25), shorter headline, pores decision, fairness limit, review questionnaire, gate-evaluation script. Open: YouTube URL (author), real handheld jitter photos (below), video edits (`submission/VIDEO_SHOTLIST.md`, R4 list), Skin Tone (needs credits).
 
-## Self-score against the R2 panel (reviews/R2_panel.md), 2026-10-17
-Panel R2: 7.0 overall (Technology 7.5, Design 7.0, Impact 6.0, Idea 8.0). This pass, same rubric, honest estimate:
-- Impact 6.0 to about 7.0: use scene, regulator sources with URLs, "demonstrated vs not" table, shop-page badge demo (`/shop-demo/`), cost per badge in units. Still missing: real handheld data and a sourced market number (not found; stated as not found).
-- Technology 7.5 to about 8.0: fully held-out CC BY faces, per-score failure table of the fixed 3-point rule, linter loophole closed. Still one API.
-- Idea 8.0 to about 8.3: the "fixed threshold fails in different places for different people" evidence.
-- Design 7.0 unchanged until the video is re-edited (phone column too small, acne zoom, voice check are for the video owner; shotlist updated). Estimated average about 7.6. YouTube URL is still TODO and blocks submission.
+## When the handheld jitter photos arrive (`../jitter_photos/`)
+1. Check the folder `~/Desktop/claude/hackathons/youcam-2026/jitter_photos/` holds the 30 still-subject photos (no faces) and `bad/` holds about 10 deliberately dark, bright or blurred ones.
+2. `python3 tools/jitter_measure.py ../jitter_photos` then `python3 tools/gate_eval.py ../jitter_photos ../jitter_photos/bad` (no API, no units).
+3. Fill the table: shift/zoom/rotation/brightness max and p95 versus the simulated range (zoom up to 3%, shift up to about 3%, exposure +-3%, no rotation), plus gate pass and rejection counts.
+4. Apply the pre-registered rule from `tools/HANDHELD_PROTOCOL.md` (if real p95 exceeds the simulated range, rerun the study with the wider range when credits allow, and say so).
+5. Put one line in DEVPOST "Next, and why it is not here" (replace `<pending ...>`) and in the Limits bullet on simulated retakes. Never commit the photos.
 
 ## Live demo
 Static hosted demo (no key, recorded real results + 3 scenarios): https://fujiken1016.github.io/skinproof/ . The API key never reaches a browser; own-photo mode needs `node server.js` with a key.

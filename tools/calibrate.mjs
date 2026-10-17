@@ -1,3 +1,4 @@
+import { MIN_NOISE } from '../src/verdict.js';
 // Calibration + out-of-sample check on REAL YouCam output (simulated handheld retakes of CC0 portraits).
 // Face A = demo/results.json (8 retakes). Faces B-E = demo/results_faces.json (4-6 retakes each, independent people).
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -15,7 +16,7 @@ function splits(n) { const o = []; for (let a = 0; a < n; a++) for (let b = a + 
 const rules = (prior) => ({
   naive1: () => 1, naive3: () => 3,
   measuredOnly: (t, B, A2) => 2 * Math.max(2, Math.abs(B[0][t] - B[1][t]), Math.abs(A2[0][t] - A2[1][t])),
-  skinproof: (t, B, A2) => 2 * Math.max(2, prior[t], Math.abs(B[0][t] - B[1][t]), Math.abs(A2[0][t] - A2[1][t])) });
+  skinproof: (t, B, A2) => 2 * Math.max(2, MIN_NOISE[t] || 0, prior[t], Math.abs(B[0][t] - B[1][t]), Math.abs(A2[0][t] - A2[1][t])) });
 function rate(R, prior) {
   const rl = rules(prior), fa = { naive1: 0, naive3: 0, measuredOnly: 0, skinproof: 0 }; let n = 0;
   for (const [bi, ai] of splits(R.length)) { const B = bi.map((i) => R[i]), A2 = ai.map((i) => R[i]);
