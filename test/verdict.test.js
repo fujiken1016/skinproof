@@ -39,3 +39,12 @@ test('noise source reported', () => {
   const r = judge([m({ pore: 50 }), m({ pore: 58 })], [m({ pore: 52 }), m({ pore: 53 })]);
   assert.equal(r[0].noiseFrom, 'your retakes');
 });
+
+test('confidence tiers', () => {
+  const clear = judge([m({ moisture: 50 }), m({ moisture: 50 })], [m({ moisture: 70 }), m({ moisture: 70 })])[0];
+  assert.equal(clear.confidence, 'confident');
+  const edge = judge([m({ moisture: 50 }), m({ moisture: 50 })], [m({ moisture: 53 }), m({ moisture: 53 })])[0];   // 3 vs needed 4
+  assert.equal(edge.confidence, 'borderline');
+  const inside = judge([m({ moisture: 50 }), m({ moisture: 50 })], [m({ moisture: 51 }), m({ moisture: 51 })])[0];
+  assert.equal(inside.confidence, 'clearly_inside_noise');
+});

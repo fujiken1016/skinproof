@@ -1,5 +1,6 @@
 import { judge, summarize, toMap } from './verdict.js';
 import { NEXT, DISCLAIMER } from './advice.js';
+import { checkPhoto } from './quality.js';
 const $ = (id) => document.getElementById(id);
 const LS = 'skinproof.v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(LS)) || []; } catch { return []; } };
@@ -12,17 +13,19 @@ $('disc').textContent = DISCLAIMER;
 const SCN = [
   { id: 'none', label: 'Nothing changed', note: 'Same scene, 2 fresh retakes. A good tool should say "no clear change".', before: ['retake_0', 'retake_1'], after: ['retake_2', 'retake_3'], tag: 'Follow-up' },
   { id: 'better', label: 'Smoother follow-up (simulated)', note: 'SIMULATED: follow-up photos are a soft-smoothed edit of the same photo. Exercises the "improved" path. Not evidence that any product works.', before: ['retake_0', 'retake_1'], after: ['better_0', 'better_1'], tag: 'Edited' },
-  { id: 'worse', label: 'Redder follow-up (simulated)', note: 'SIMULATED: follow-up photos get a red colour cast. Exercises the "score fell" path. No real skin change is implied.', before: ['retake_0', 'retake_1'], after: ['worse_0', 'worse_1'], tag: 'Edited' }];
+  { id: 'worse', label: 'Redder follow-up (simulated)', note: 'SIMULATED: follow-up photos get a red colour cast. Redness fell as expected; Pores also fell because a colour cast changes how pores read. Both are measurement changes, not claims about skin.', before: ['retake_0', 'retake_1'], after: ['worse_0', 'worse_1'], tag: 'Edited' }];
 let results = null;
-Promise.all([fetch('demo/results.json').then((r) => r.json()), fetch('demo/study.json').then((r) => r.json())]).then(([r, st]) => { results = r; study(st); tabs(); pickScn(SCN[0]); }).catch(() => {});
+Promise.all([fetch('demo/results.json').then((r) => r.json()), fetch('demo/study.json').then((r) => r.json()), fetch('demo/per_face.json').then((r) => r.json())]).then(([r, st, pf]) => { results = r; study(st, pf); tabs(); pickScn(SCN[0]); }).catch(() => {});
 
-function study(s) {
-  const o = s.out_of_sample_total, nf = Object.keys(s.faces).length;
-  $('study').innerHTML = `<div class="stat bad"><b>${o.naive1}%</b><span>false "changed" if any 1-point move counts</span></div>
-    <div class="stat bad"><b>${o.naive3}%</b><span>if only 3+ point moves count</span></div>
-    <div class="stat hero"><b>${o.skinproof}%</b><span>SkinProof rule (2 x retake noise)</span></div>
-    <div class="stat"><b>${nf} faces</b><span>${o.n.toLocaleString()} no-change comparisons on 4 held-out faces</span></div>`;
-  if (s.london_holdout) $('study2').textContent = `Fully held out: ${s.london_holdout.faces} more people from a CC BY 4.0 research photo set (${s.london_holdout.n} comparisons): ${s.london_holdout.naive1}% / ${s.london_holdout.naive3}% / ${s.london_holdout.skinproof}% for the same three rules. That is 1 false alarm in ${s.london_holdout.n} for SkinProof; the sample is small.`;
+function study(s, pf) {
+  const cc0 = ['f1', 'f10', 'f21', 'f28'].map((k) => pf.perFace[k]), mean = (m) => +(cc0.reduce((t, f) => t + f[m], 0) / cc0.length).toFixed(1);
+  const rng = (m) => `${Math.min(...cc0.map((f) => f[m]))} to ${Math.max(...cc0.map((f) => f[m]))}`;
+  $('study').innerHTML = `<div class="stat bad"><b>${mean('one')}%</b><span>false "changed" if any 1-point move counts (faces: ${rng('one')}%)</span></div>
+    <div class="stat bad"><b>${mean('three')}%</b><span>if only 3+ point moves count (${rng('three')}%)</span></div>
+    <div class="stat hero"><b>${mean('skinproof')}%</b><span>SkinProof rule, 2 x retake noise (${rng('skinproof')}%)</span></div>
+    <div class="stat"><b>4 faces</b><span>average per held-out face; comparisons inside a face overlap, so the face is the unit</span></div>`;
+  const sm = pf.summary;
+  $('study2').textContent = `Supplement, adding 3 people from a CC BY 4.0 research photo set (7 faces, 95% interval by resampling faces): 1-point ${sm.one.mean}% (${sm.one.lo} to ${sm.one.hi}), 3-point ${sm.three.mean}% (${sm.three.lo} to ${sm.three.hi}), SkinProof ${sm.skinproof.mean}% (${sm.skinproof.lo} to ${sm.skinproof.hi}).`;
 }
 function tabs() {
   $('tabs').replaceChildren(...SCN.map((s, i) => { const b = document.createElement('button'); b.role = 'tab'; b.textContent = s.label; b.setAttribute('aria-selected', i === 0);
@@ -44,7 +47,7 @@ function render(t, el) {
   const head = `<p class="headline">${sm.headline}</p><p class="legend">Bar: dashed line = no change. Shaded zone = change that still counts as noise. Black tick = your measured change.</p>`;
   const body = rows.map((r) => {
     const sign = r.delta > 0 ? '+' : '';
-    return `<div class="row"><div class="top"><span>${r.label}</span><span class="pill v-${r.verdict}">${ico[r.verdict]}${lab[r.verdict]}</span></div>
+    return `<div class="row"><div class="top"><span>${r.label}</span><span class="pill v-${r.verdict}">${ico[r.verdict]}${lab[r.verdict]}${r.confidence === 'borderline' ? ' (close to the line)' : ''}</span></div>
       <div class="bar" aria-hidden="true"><b style="left:${Math.max(0, 50 - r.needed)}%;width:${Math.min(100, r.needed * 2)}%"></b><i style="left:calc(${Math.max(1, Math.min(99, 50 + r.delta))}% - 2px)"></i></div>
       <small>${r.before} to ${r.after} (${sign}${r.delta})</small><details><summary>Details</summary><small>Needs more than ±${r.needed} to count. Noise ${r.noise} from ${r.noiseFrom}.</small></details></div>`; }).join('');
   const flag = rows.filter((r) => r.verdict === 'worse' || r.verdict === 'no_clear_change').slice(0, 3);
@@ -63,7 +66,11 @@ async function shrink(file) {
   const s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
   const c = document.createElement('canvas'); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
   c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-  if (Math.min(c.width, c.height) < 480) throw new Error('Photo is too small (short side must be 480px+).');
+  const sm = document.createElement('canvas'); sm.width = 96; sm.height = Math.max(8, Math.round(96 * c.height / c.width)); const sx = sm.getContext('2d'); sx.drawImage(c, 0, 0, sm.width, sm.height);
+  const px = sx.getImageData(0, 0, sm.width, sm.height).data, gray = new Uint8ClampedArray(sm.width * sm.height);
+  for (let i = 0; i < gray.length; i++) gray[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+  const q = checkPhoto({ width: c.width, height: c.height, gray, w: sm.width, h: sm.height });
+  if (!q.ok) throw new Error(q.issues[0]);
   return c.toDataURL('image/jpeg', 0.9);
 }
 async function analyse(dataUrl) {
@@ -103,7 +110,7 @@ $('judge').onclick = async () => {
 function reset() { ['b0', 'b1', 'a0', 'a1'].forEach((id, i) => { const el = $(id); el.classList.remove('done'); el.querySelector('input').value = ''; el.querySelector('span').textContent = (i < 2 ? 'Baseline' : 'Follow-up') + ' photo ' + ((i % 2) + 1); }); $('name').value = ''; $('save').disabled = true; $('judge').disabled = true; }
 const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
 function showTrial(t) {
-  $('thumbs').replaceChildren(); $('scn-note').textContent = `${t.name}: ${days(t.date, t.afterDate)} days between baseline and follow-up.`;
+  $('thumbs').replaceChildren(); $('scn-note').textContent = (days(t.date, t.afterDate) < 1 ? `${t.name}: same-day demo run. For a real check, wait 2 weeks or more between baseline and follow-up.` : `${t.name}: ${days(t.date, t.afterDate)} days between baseline and follow-up.`);
   render({ rows: judge(t.before, t.after) }, $('result')); $('h-demo').scrollIntoView({ behavior: 'smooth' });
 }
 function trialsRender() {

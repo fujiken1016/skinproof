@@ -49,7 +49,9 @@ export function judge(before, after) {
     else if (delta >= needed) verdict = 'improved';
     else if (delta <= -needed) verdict = 'worse';
     rows.push({ type, label: CONCERNS[type], before: round(mean(b)), after: round(mean(a)),
-      delta: round(delta), noise: round(noise), noiseFrom, needed: round(needed), verdict });
+      delta: round(delta), noise: round(noise), noiseFrom, needed: round(needed), verdict,
+      margin: round(Math.abs(delta) / needed),                      // 1.0 = exactly at the line
+      confidence: verdict === 'unreliable' ? 'cannot_judge' : verdict !== 'no_clear_change' ? 'confident' : Math.abs(delta) >= 0.6 * needed ? 'borderline' : 'clearly_inside_noise' });
   }
   rows.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
   return rows;

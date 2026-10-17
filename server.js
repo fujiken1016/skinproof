@@ -38,7 +38,7 @@ http.createServer(async (req, res) => {
     }
     if (req.method === 'GET') {
       let p = req.url.split('?')[0]; if (p.endsWith('/')) p += 'index.html';
-      const SRC = { '/verdict.js': './src/verdict.js', '/advice.js': './src/advice.js' };
+      const SRC = { '/verdict.js': './src/verdict.js', '/advice.js': './src/advice.js', '/quality.js': './src/quality.js' };
       const f = SRC[p] ? fileURLToPath(new URL(SRC[p], import.meta.url)) : normalize(join(ROOT, p));
       if (!SRC[p] && !f.startsWith(ROOT)) return send(res, 403, { error: 'no' });
       const body = await readFile(f).catch(() => null);

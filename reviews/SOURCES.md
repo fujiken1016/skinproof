@@ -35,3 +35,7 @@
 ## 4. Positioning of Skin Analysis for eCommerce
 - One sentence: Perfect Corp pitches its AI Skin Analysis as a selfie tool that gives online beauty shoppers quick, measurable skin-metric scores to help them choose products.
 - URL: https://www.perfectcorp.com/business/products/ai-skin-analysis (confidence: medium; paraphrase from fetch summary; page says "15 skin metrics" while docs show up to 16 concerns).
+
+## Correction 2026-10-18
+- ASA page wording (re-read 2026-10-18): "signed and dated proof that the photos are genuine and have not been manipulated"; "should not exaggerate the efficacy of the product"; ruling summary: no evidence that images were "representative of the effect consumers could likely expect". The phrase "realistically achievable" is not on the page and must not be used.
+- Perfect Corp product page: "scores 15 skin metrics on a 0-100 scale"; it does not state a 'help shoppers choose' sentence, so that paraphrase was removed.

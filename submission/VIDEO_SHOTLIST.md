@@ -35,3 +35,13 @@ Target 2:00 to 2:30 (rules: 1 to 3 min, judges stop at 3:00; YouTube public; mus
 
 ## Copied from winners' videos (reviews/ROLE_MODELS_VIDEO2.md, opened 2026-10-17)
 Open on a concrete problem line within 2 s; burned-in captions with one big headline per scene; show the live app plus real API steps; end card 8 to 10 s with tagline, QR codes (demo / repo) and readable URLs; same links and chapter timestamps in the YouTube description; show the YouCam credit early; 2:20 to 3:00 is the winners' range.
+
+## R3 list for the video owner (edits only, no API credit needed)
+1. Pores beat: over the red-cast scene say "Redness fell far beyond the noise. Pores moved too, because a red cast changes how pores read. Both are measurement changes, not skin claims." (app note matches).
+2. "0 days": the same-day demo now reads "same-day demo run"; add an on-screen chip "TIME SKIP: 3 weeks later (illustrative)" at the cut, keep the voice "Weeks later" only after the chip.
+3. Numbers on screen: use the per-face averages 22.9% / 2.0% / 0.1% (4 held-out CC0 faces), not 20.1% and not "1,296". Say "on average per face".
+4. Regulator wording (if shown): ASA says photos should be genuine and not manipulated, and should not exaggerate the efficacy. Do not say "realistically achievable".
+5. End card 8 to 10 s with two QR codes (demo, GitHub) plus readable URLs; add the shop badge page for 6 s before it (replace part of the Mina card, keep Mina to 8 s, three short sentences).
+6. Voice: someone listens through once. Say "Acne varies more than that on this face". Pause 0.8 s before "No clear change".
+7. Captions: split at phrases; fix the double space in "so it says  no clear change". Voice "Second take: real YouCam scores, simulated follow-up photos" and add the chip "recorded earlier".
+8. Show the photo preview appearing right after selection (one keyframe).
