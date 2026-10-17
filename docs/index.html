@@ -7,14 +7,15 @@
 <header>
   <p class="eyebrow">Built on the YouCam Skin Analysis API</p>
   <h1>Did that product <em>actually</em> work?</h1>
-  <p class="lead">Two photos of the same face, seconds apart, already score differently. SkinProof measures that wobble first, then only says <b>improved</b> or <b>worse</b> when the change is bigger than it. Otherwise it tells you the truth: <b>no clear change yet</b>.</p>
+  <p class="lead">In our tests, two photos of the same face already score differently. SkinProof measures that wobble first, then only says <b>improved</b> or <b>worse</b> when the change is bigger than it. Otherwise it tells you the truth: <b>no clear change yet</b>.</p>
   <p id="mode" class="badge" hidden></p>
 </header>
 
 <section class="card" aria-labelledby="h-study">
-  <h2 id="h-study">The problem, measured</h2>
-  <p class="hint">We ran 8 handheld-style retakes of one portrait through YouCam Skin Analysis (12 concerns, 2,520 before/after comparisons where <u>nothing changed</u>). How often did each rule claim a change that did not happen?</p>
+  <h2 id="h-study">The problem, measured (our internal test)</h2>
+  <p class="hint">Real YouCam scores, but the retakes are <b>simulated</b> (small shift, zoom, exposure, noise and JPEG changes) from 5 public-domain portraits, not real handheld sessions. The rule's noise prior was fitted on one face; the numbers below are on the <b>4 other faces</b>, where nothing changed between "before" and "after". How often did each rule claim a change anyway?</p>
   <div class="stats" id="study" aria-live="polite"></div>
+  <p class="hint">Read it as "much lower false alarms in our test", not as an accuracy claim: 5 people, simulated retakes, comparisons within a face overlap. Even a plain 3-point threshold does well here; what SkinProof adds is that the threshold adapts to each concern and to your own retakes.</p>
 </section>
 
 <section class="card" aria-labelledby="h-demo">
@@ -28,8 +29,9 @@
 
 <section id="s-live" class="card" hidden aria-labelledby="h-live">
   <h2 id="h-live">Try it with your own photos</h2>
-  <label>Product or routine <input id="name" maxlength="60" placeholder="e.g. new niacinamide serum"></label>
+  <label>Product or routine <input id="name" maxlength="60" placeholder="e.g. new night serum"></label>
   <p class="hint">Take <b>two photos back to back</b>: same light, face centred (60 to 80% of the frame), neutral expression, no makeup.</p>
+  <label class="check"><input type="checkbox" id="consent"> I agree to send these photos to YouCam (Perfect Corp) for analysis. SkinProof does not store them; YouCam's retention follows its own policy.</label>
   <div class="shots"><label class="shot" id="b0"><input type="file" accept="image/*" capture="user"><span>Baseline photo 1</span></label>
   <label class="shot" id="b1"><input type="file" accept="image/*" capture="user"><span>Baseline photo 2</span></label></div>
   <button id="save" disabled>Analyse and save baseline</button><p id="msg1" class="msg" role="status"></p>
@@ -44,10 +46,10 @@
 <section class="card" aria-labelledby="h-how">
   <h2 id="h-how">How the YouCam API is used</h2>
   <ol class="how">
-    <li><code>POST /s2s/v2.0/file</code> then <code>PUT</code> to the pre-signed URL (photo is sent once, never stored by SkinProof).</li>
+    <li><code>POST /s2s/v2.0/file</code> then <code>PUT</code> to the pre-signed URL (each photo is sent once to YouCam; SkinProof does not store it).</li>
     <li><code>POST /s2s/v2.0/task/skin-analysis</code> with 12 SD concerns (<code>acne, redness, oiliness, moisture, pore, texture, wrinkle, age_spot, radiance, dark_circle_v2, eye_bag, firmness</code>), <code>format: json</code>.</li>
     <li>Poll <code>GET /task/skin-analysis/{task_id}</code> and read <code>raw_score</code> per concern. One check is 4 photos, about 14 units each.</li>
-    <li><b>The rule:</b> noise = the larger of your two retake gaps, a 2-point floor, and that concern's measured SD (acne and pores are jumpy). A change counts only if it exceeds <b>2 x noise</b>.</li>
+    <li><b>The rule:</b> noise = the larger of your two retake gaps, a 2-point floor, and that concern's SD measured across our 5 test faces. A change counts only if it exceeds <b>2 x noise</b>.</li>
   </ol>
   <p class="hint">The API key stays on the server. The decision logic is a pure, unit-tested function you can read in <code>verdict.js</code>.</p>
 </section>
@@ -55,7 +57,7 @@
 <section class="card" aria-labelledby="h-lim">
   <h2 id="h-lim">What it will not claim</h2>
   <ul class="how"><li>It is a cosmetic self-tracking tool, not a medical device. It cannot diagnose anything.</li>
-  <li>Scores depend on light, angle and makeup. The noise study is one face under simulated retakes; your noise may differ, which is why your own retakes are measured too.</li>
+  <li>Scores depend on light, angle and makeup. The noise study is 5 faces under simulated retakes; your noise may differ, which is why your own retakes are measured too.</li>
   <li>Most concerns change over weeks, not days. The demo follow-ups are <b>simulated edits</b> of a CC0 photo to exercise the logic, not evidence that any product works.</li></ul>
 </section>
 <footer><p id="disc"></p><p>Demo photo: CC0 portrait, see <a href="https://github.com/fujiken1016/skinproof/blob/main/demo/CREDITS.md">credits</a>. MIT licensed, <a href="https://github.com/fujiken1016/skinproof">source on GitHub</a>.

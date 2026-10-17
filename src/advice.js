@@ -1,16 +1,17 @@
-// Plain-language next steps. Ingredient CLASSES only (no brands). Not medical advice.
+// Next steps are about HOW TO MEASURE AND WHEN TO SEE A PROFESSIONAL. No ingredient names, no efficacy claims.
+// Enforced by test/claims.test.js. Not medical advice.
 export const NEXT = {
-  acne: 'If acne scored low: look at gentle exfoliating acids (e.g. salicylic) or niacinamide, one at a time. Persistent or painful acne: see a dermatologist.',
-  redness: 'If redness is low: pause actives, use a fragrance-free barrier moisturiser and daily SPF. Sudden or burning redness: stop the new product.',
-  oiliness: 'If oiliness is off: a light gel moisturiser and gentle cleanser usually beat harsh stripping.',
-  moisture: 'If moisture is low: humectants (glycerin, hyaluronic acid) under an occlusive moisturiser.',
-  pore: 'Pores respond slowly to acids and retinoids; judge over 8+ weeks, not days.',
-  texture: 'Texture usually needs weeks of gentle exfoliation or retinoids plus sunscreen.',
-  wrinkle: 'Wrinkles change slowest: retinoids and SPF are the evidence-backed pair. Re-check at 12 weeks.',
-  age_spot: 'Dark spots: daily SPF is the base; vitamin C or azelaic acid help over months.',
+  acne: 'Acne scores vary a lot between retakes. Re-check in the same light on the same day of your routine, and note what changed. Persistent, painful or spreading breakouts: talk to a dermatologist or pharmacist.',
+  redness: 'If this score rose after you started something new, pause the new product and re-check in a few days. Burning, swelling or pain: stop and see a clinician.',
+  oiliness: 'This score moves with time of day and washing. Retake at the same hour, same light, before judging.',
+  moisture: 'This score moves with washing and weather. Retake at the same time of day, then compare.',
+  pore: 'Pores score noisily. Judge over several weeks of same-condition photos, not days.',
+  texture: 'Texture changes slowly and depends on lighting angle. Re-check at the same angle every 2-4 weeks.',
+  wrinkle: 'Wrinkle scores change slowly and depend on expression and light. Re-check at the same distance and expression.',
+  age_spot: 'Spot scores depend on light and makeup. Retake bare-faced in daylight; for any changing or unusual spot, see a dermatologist.',
   radiance: 'Radiance swings with sleep, light and hydration. Retake at the same hour in the same light.',
-  dark_circle_v2: 'Dark circles are partly structural; sleep, SPF and caffeine/vitamin K eye products have mixed evidence.',
-  eye_bag: 'Eye bags are mostly structural or fluid. Retake at the same time of day before judging.',
-  firmness: 'Firmness: retinoids and peptides over months; protect with SPF.',
+  dark_circle_v2: 'Dark-circle scores depend on light and angle. Retake at the same time of day.',
+  eye_bag: 'Eye-area scores depend on time of day and angle. Retake at the same time of day before judging.',
+  firmness: 'Firmness scores change slowly and depend on pose and light. Re-check at the same pose every 2-4 weeks.',
 };
-export const DISCLAIMER = 'SkinProof is a cosmetic self-tracking tool, not a medical device. It cannot diagnose skin conditions. See a clinician for concerns.';
+export const DISCLAIMER = 'SkinProof is a cosmetic self-tracking tool, not a medical device. It cannot diagnose skin conditions. Photos are sent to YouCam (Perfect Corp) for analysis and are not stored by SkinProof; see a clinician for any concern.';

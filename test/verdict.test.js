@@ -31,8 +31,8 @@ test('missing data skipped; headline honest', () => {
 test('toMap', () => assert.deepEqual(toMap([{ type: 'acne', raw_score: 3 }, { type: 'x' }]), { acne: 3 }));
 
 test('jumpy concern: identical-looking retakes still need a big change (acne prior)', () => {
-  const r = judge([m({ acne: 90 }), m({ acne: 90 })], [m({ acne: 84 }), m({ acne: 84 })]);
-  assert.ok(PRIOR_SD.acne > 4); assert.equal(r[0].verdict, 'no_clear_change');   // -6 < 2*4.57
+  const r = judge([m({ acne: 90 }), m({ acne: 90 })], [m({ acne: 87 }), m({ acne: 87 })]);
+  assert.ok(PRIOR_SD.acne > 2); assert.equal(r[0].verdict, 'no_clear_change');   // -3 < 2*2.22
   assert.equal(r[0].noiseFrom, 'known jumpy concern');
 });
 test('noise source reported', () => {

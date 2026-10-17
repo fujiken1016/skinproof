@@ -11,11 +11,12 @@ export const ACTIONS = Object.keys(CONCERNS);
 
 const NOISE_FLOOR = 2.0;   // score points; never trust a gap smaller than this
 const K = 2.0;             // change must exceed K x noise
-// Per-concern retake SD measured on the REAL YouCam API: 8 simulated handheld retakes of one CC0 portrait
-// (tools/calibrate.mjs, demo/results.json). Two retakes can look identical by luck, so a concern known to
-// be jumpy (acne SD 4.6, pores 2.7) never gets a smaller noise estimate than this. One face, one lighting.
-export const PRIOR_SD = { eye_bag: 0.3, acne: 4.57, dark_circle_v2: 0.55, firmness: 0.17, pore: 2.66, oiliness: 0.49,
-  age_spot: 0.16, texture: 0.08, wrinkle: 0.24, radiance: 0.49, redness: 0.62, moisture: 0.5 };
+// Per-concern retake SD measured on the REAL YouCam API: simulated handheld retakes (shift/zoom/exposure/noise/JPEG)
+// of 5 different CC0 portraits, 29 photos (tools/calibrate.mjs; data demo/results*.json). Pooled as RMS across faces.
+// SD differs a lot by person (texture 0.08 on one face, ~2 on another), so this is only a prior: the user's own retake
+// gap still counts and the larger of the two wins. Simulated retakes, 5 faces: a rough guide, not a precise constant.
+export const PRIOR_SD = { eye_bag: 0.33, acne: 2.22, dark_circle_v2: 0.51, firmness: 1.43, pore: 1.33, oiliness: 0.76,
+  age_spot: 0.2, texture: 1.58, wrinkle: 0.29, radiance: 0.88, redness: 0.39, moisture: 1.12 };
 
 const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
 
@@ -59,9 +60,9 @@ export function summarize(rows) {
   for (const r of rows) c[r.verdict]++;
   let headline;
   if (!rows.length) headline = 'Not enough data to judge.';
-  else if (c.improved && !c.worse) headline = `Likely working: ${c.improved} concern${c.improved > 1 ? 's' : ''} improved beyond retake noise.`;
-  else if (c.worse && !c.improved) headline = `Possibly not agreeing with your skin: ${c.worse} concern${c.worse > 1 ? 's' : ''} got worse beyond noise.`;
-  else if (c.worse && c.improved) headline = `Mixed result: ${c.improved} improved, ${c.worse} worsened.`;
+  else if (c.improved && !c.worse) headline = `${c.improved} score${c.improved > 1 ? 's' : ''} rose beyond retake noise. That is a measurement, not proof that a product works.`;
+  else if (c.worse && !c.improved) headline = `${c.worse} score${c.worse > 1 ? 's' : ''} fell beyond retake noise. This is a measurement, not a diagnosis.`;
+  else if (c.worse && c.improved) headline = `Mixed: ${c.improved} score${c.improved > 1 ? 's' : ''} rose, ${c.worse} fell, beyond retake noise.`;
   else headline = 'No change you can trust yet. Keep going and re-check later; that is a real answer, not a failure.';
   return { counts: c, headline };
 }

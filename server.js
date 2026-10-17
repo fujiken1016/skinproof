@@ -38,8 +38,9 @@ http.createServer(async (req, res) => {
     }
     if (req.method === 'GET') {
       const p = req.url.split('?')[0] === '/' ? '/index.html' : req.url.split('?')[0];
-      const f = p === '/verdict.js' ? fileURLToPath(new URL('./src/verdict.js', import.meta.url)) : normalize(join(ROOT, p));
-      if (p !== '/verdict.js' && !f.startsWith(ROOT)) return send(res, 403, { error: 'no' });
+      const SRC = { '/verdict.js': './src/verdict.js', '/advice.js': './src/advice.js' };
+      const f = SRC[p] ? fileURLToPath(new URL(SRC[p], import.meta.url)) : normalize(join(ROOT, p));
+      if (!SRC[p] && !f.startsWith(ROOT)) return send(res, 403, { error: 'no' });
       const body = await readFile(f).catch(() => null);
       if (!body) return send(res, 404, { error: 'not found' });
       res.writeHead(200, { 'Content-Type': MIME[extname(f)] || 'application/octet-stream' }); return res.end(body);
