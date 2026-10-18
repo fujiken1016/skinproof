@@ -1,0 +1,48 @@
+{
+ "date": "2026-10-18",
+ "subject": "still faceless object, handheld, 14 photos (photos not published)",
+ "method": "tools/jitter_measure.py (ORB + partial affine); vs first photo and vs previous photo (--adjacent)",
+ "vs_first": {
+  "shift_pct": {
+   "max": 31.94,
+   "p95": 24.42
+  },
+  "zoom_pct": {
+   "max": 24.62,
+   "p95": 23.35
+  },
+  "rot_deg": {
+   "max": 5.52,
+   "p95": 5.11
+  },
+  "bright_pct": {
+   "max": 10.33,
+   "p95": 7.76
+  }
+ },
+ "vs_previous": {
+  "shift_pct": {
+   "max": 34.47,
+   "p95": 29.68
+  },
+  "zoom_pct": {
+   "max": 18.96,
+   "p95": 15.2
+  },
+  "rot_deg": {
+   "max": 15.6,
+   "p95": 10.02
+  },
+  "bright_pct": {
+   "max": 14.75,
+   "p95": 12.39
+  }
+ },
+ "simulated_range": {
+  "shift_pct": "about 0 to 3 (crop offset)",
+  "zoom_pct": "0 to 3",
+  "rot_deg": "0 (none)",
+  "bright_pct": "0 to 3"
+ },
+ "sensitivity_within_simulated_range": "Spearman 0.0 (zoom -0.01, shift 0.0, brightness -0.07), n=29; no extrapolation possible (tools/jitter_sensitivity.py)"
+}

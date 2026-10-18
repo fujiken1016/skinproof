@@ -32,15 +32,17 @@ People ask "is this serum working?" right when they are about to rebuy. One befo
 ## Self-score
 Latest panel: R4, 8.1 (see `reviews/R1_panel.md` to `R4_panel.md` for the history, 6.4 to 8.1). Done without API credits in this pass: test count (25), shorter headline, pores decision, fairness limit, review questionnaire, gate-evaluation script. Open: YouTube URL (author), real handheld jitter photos (below), video edits (`submission/VIDEO_SHOTLIST.md`, R4 list), Skin Tone (needs credits).
 
-## When the handheld jitter photos arrive (`../jitter_photos/`)
-1. Check the folder `~/Desktop/claude/hackathons/youcam-2026/jitter_photos/` holds the 30 still-subject photos (no faces) and `bad/` holds about 10 deliberately dark, bright or blurred ones.
-2. `python3 tools/jitter_measure.py ../jitter_photos` then `python3 tools/gate_eval.py ../jitter_photos ../jitter_photos/bad` (no API, no units).
-3. Fill the table: shift/zoom/rotation/brightness max and p95 versus the simulated range (zoom up to 3%, shift up to about 3%, exposure +-3%, no rotation), plus gate pass and rejection counts.
-4. Apply the pre-registered rule from `tools/HANDHELD_PROTOCOL.md` (if real p95 exceeds the simulated range, rerun the study with the wider range when credits allow, and say so).
-5. Put one line in DEVPOST "Next, and why it is not here" (replace `<pending ...>`) and in the Limits bullet on simulated retakes. Never commit the photos.
-
-## Demo video
-https://youtu.be/zVjPz-tkBYE (YouCam Skin Analysis API: what it does, live run, API flow, limits).
+## Real handheld jitter vs our simulated retakes (measured 2026-10-18, no faces, no API)
+14 handheld photos of a still, faceless object, framed afresh each time (photos not published; numbers in `demo/jitter_measured.json`; `tools/jitter_measure.py`, add `--adjacent` to compare with the previous photo).
+| Measure | Simulated retakes | Real handheld, vs first (max / p95) | Real handheld, vs previous (max / p95) |
+|---|---|---|---|
+| Shift of image centre (% of width) | about 0 to 3 | 31.9 / 24.4 | 34.5 / 29.7 |
+| Zoom (%) | 0 to 3 | 24.6 / 23.4 | 19.0 / 15.2 |
+| Rotation (degrees) | 0 (none simulated) | 5.5 / 5.1 | 15.6 / 10.0 (some pairs may be mismatched) |
+| Brightness change (%) | 0 to 3 | 10.3 / 7.8 | 14.8 / 12.4 |
+Reading: real framing jitter is several times larger than we simulated on every measure, and we simulated no rotation. Caveats: one subject, a feature-matching estimate, and freely re-framed photos (a selfie is framed to put the face at 60 to 80% of the frame, so face-framing jitter in use may be smaller; unknown).
+Can stored API results tell us the error rate under the larger jitter? No. Within the simulated range, a retake's score deviation does not track its zoom, shift or brightness (Spearman 0.0, -0.01 and -0.07 on 29 photos; `tools/jitter_sensitivity.py`), so extrapolating 5 to 10 times beyond that range is not supported, and we ran no new API calls. Honest limit: real handheld noise is probably larger than our simulated noise, so in real use the noise floor is likely wider and the false-alarm figures above may not carry over; the user's own retake gap, which always counts, is what protects them. Rerunning the study with wider jitter needs API credits (pre-registered rule in `tools/HANDHELD_PROTOCOL.md`).
+Still to do: the 10 deliberately bad photos go in `../jitter_photos/bad/`, then `python3 tools/gate_eval.py ../jitter_photos ../jitter_photos/bad` reports the quality-gate rejection rate.
 
 ## Live demo
 Static hosted demo (no key, recorded real results + 3 scenarios): https://fujiken1016.github.io/skinproof/ . The API key never reaches a browser; own-photo mode needs `node server.js` with a key.
