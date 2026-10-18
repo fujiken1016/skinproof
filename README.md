@@ -39,6 +39,9 @@ Latest panel: R4, 8.1 (see `reviews/R1_panel.md` to `R4_panel.md` for the histor
 4. Apply the pre-registered rule from `tools/HANDHELD_PROTOCOL.md` (if real p95 exceeds the simulated range, rerun the study with the wider range when credits allow, and say so).
 5. Put one line in DEVPOST "Next, and why it is not here" (replace `<pending ...>`) and in the Limits bullet on simulated retakes. Never commit the photos.
 
+## Demo video
+https://youtu.be/zVjPz-tkBYE (YouCam Skin Analysis API: what it does, live run, API flow, limits).
+
 ## Live demo
 Static hosted demo (no key, recorded real results + 3 scenarios): https://fujiken1016.github.io/skinproof/ . The API key never reaches a browser; own-photo mode needs `node server.js` with a key.
 

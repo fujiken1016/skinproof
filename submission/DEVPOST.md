@@ -4,7 +4,7 @@
 
 **YouCam API used:** Skin Analysis (SD, 12 concerns, `format: json`; 14 units per photo per the official docs).
 **Try it:** keyless replay of real recorded results https://fujiken1016.github.io/skinproof/ , shop-page badge demo https://fujiken1016.github.io/skinproof/shop-demo/ , code https://github.com/fujiken1016/skinproof . Your own photos in about 2 minutes: clone, then `node server.js` (Node 22, no install; no key = MOCK scores so you can walk the whole flow; `YOUCAM_API_KEY=... node server.js` = live YouCam). Steps are in the README.
-**Video:** <YouTube URL: TODO, filled in by the author before submitting>
+**Video:** https://youtu.be/zVjPz-tkBYE
 
 | Demonstrated | Not demonstrated |
 |---|---|
@@ -53,6 +53,6 @@ One flow: consent, two photos, baseline, re-check, verdict. "No clear change" is
 
 ## Next, and why it is not here
 - Skin Tone Analysis to widen the bar in hard light: not built because the free API credits were used up on the validation study; the browser quality gate (exposure, blur, size) is the credit-free step in that direction.
-- Real handheld retakes with consented volunteers: not done because it needs consent and time; instead a faceless handheld-jitter measurement (`tools/HANDHELD_PROTOCOL.md`, `tools/jitter_measure.py`, `tools/gate_eval.py`) checks whether our simulated jitter covers real jitter. Result: <pending, filled in when the photos are measured>.
+- Real handheld retakes with consented volunteers: not done because it needs consent and time; instead a faceless handheld-jitter measurement (`tools/HANDHELD_PROTOCOL.md`, `tools/jitter_measure.py`, `tools/gate_eval.py`) checks whether our simulated jitter covers real jitter. Result: not measured yet.
 
 Built with: YouCam Skin Analysis API, Node 22 (no dependencies), vanilla JS, GitHub Pages. Photo credits in `demo/CREDITS.md`.
