@@ -14,3 +14,16 @@ export function checkPhoto({ width, height, gray, w, h }) {
   if (variance < 25) issues.push('Looks blurry: hold still and let the camera focus.');
   return { ok: issues.length === 0, issues, mean: Math.round(mean), sharpness: Math.round(variance) };
 }
+
+// Subject-independent blur check between two photos of the SAME session (baseline pair or follow-up pair).
+// Real phone tests (tools/gate_analysis.py): an absolute sharpness threshold depends on the subject, but the ratio between photos of one
+// session does not. Pass the Laplacian variance of each photo measured on a 480 px wide grayscale copy.
+export function laplacianVariance(gray, w, h) {
+  let n = 0, s = 0, s2 = 0;
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; const l = 4 * gray[i] - gray[i - 1] - gray[i + 1] - gray[i - w] - gray[i + w]; n++; s += l; s2 += l * l; }
+  return n ? s2 / n - (s / n) ** 2 : 0;
+}
+export function relativeSharpnessIssue(a, b, ratio = 0.6) {
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  return hi > 0 && lo / hi < ratio ? 'One photo looks much less sharp than the other. Retake the blurrier one so the pair matches.' : null;
+}

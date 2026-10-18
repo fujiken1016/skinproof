@@ -55,3 +55,5 @@ Open on a concrete problem line within 2 s; burned-in captions with one big head
 6. Voice: a person listens once; add `|0.8|` pauses before "no clear change" and "beyond the noise"; or record a human voice and replace `audio.wav`.
 7. Overlaps: move the TIME SKIP chip away from the "4x speed" chip; keep the "All tests pass" caption off the last line of the terminal; show a photo preview appearing right after a file is chosen.
 8. Test count if shown: 25.
+
+Note (2026-10-18): the quality-gate scene must say it uses synthetic dark and blurry photos, because real phone photos mostly passed the brightness gate (README, gate section). Show the new within-session blur warning with a blurry pair if you can.
