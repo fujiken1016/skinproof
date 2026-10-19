@@ -1,0 +1,51 @@
+{
+ "hypothetical_scaling_of_observed_scores": {
+  "k=1": {
+   "one_point": 22.9,
+   "three_point": 2,
+   "skinproof": 0.1
+  },
+  "k=2": {
+   "one_point": 36.7,
+   "three_point": 12.5,
+   "skinproof": 0.7
+  },
+  "k=3": {
+   "one_point": 46.5,
+   "three_point": 22.9,
+   "skinproof": 2
+  },
+  "k=5": {
+   "one_point": 57.3,
+   "three_point": 32.5,
+   "skinproof": 2.3
+  },
+  "k=10": {
+   "one_point": 68.3,
+   "three_point": 48.7,
+   "skinproof": 3.5
+  }
+ },
+ "gaussian_monte_carlo_sd1": {
+  "sd=0.5": {
+   "one_point": 4.5,
+   "three_point": 0,
+   "skinproof_no_prior": 0
+  },
+  "sd=1": {
+   "one_point": 32.1,
+   "three_point": 0.3,
+   "skinproof_no_prior": 0
+  },
+  "sd=2": {
+   "one_point": 61.9,
+   "three_point": 13.9,
+   "skinproof_no_prior": 1.7
+  },
+  "sd=4": {
+   "one_point": 80.4,
+   "three_point": 45.5,
+   "skinproof_no_prior": 5.6
+  }
+ }
+}

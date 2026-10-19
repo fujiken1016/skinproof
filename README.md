@@ -4,6 +4,8 @@
 
 Built for the YouCam API Skin AI & eCommerce VTO Hackathon (Skin AI track).
 
+> **What we measured:** with small simulated retake jitter (4 held-out faces), a rule that reports any 1-point move claimed a change that never happened 22.9% of the time on average; SkinProof's rule, 0.1%. **What we also measured:** real handheld jitter (14 photos of a still object, no API) is several times larger than we simulated (shift p95 24 to 30% of width vs about 3%; zoom 15 to 23% vs 3%; rotation 5 to 10 degrees vs none; brightness 8 to 12% vs 3%), so those two numbers are a best case, not a forecast. SkinProof's defence is that the bar is measured from your own two retakes. A hypothetical scaling of the observed noise (`tools/noise_scaling.mjs`, not a measurement) shows the fixed rules degrading much faster than SkinProof's. **Quality checks on real bad phone photos:** the shipped absolute gate rejected 0 of 10; the within-session sharpness ratio catches about 5 of 10. Details below.
+
 ## The idea
 People ask "is this serum working?" right when they are about to rebuy. One before/after selfie pair cannot answer that: in our test, two photos of the same face already scored differently. So SkinProof takes **two back-to-back photos at baseline and two at follow-up**. The gap between the two retakes is the noise floor. A concern is only called *improved* or *worse* if the change exceeds 2x that noise (minimum 2 points). Otherwise the honest answer is "no clear change yet", and if the retakes disagree wildly it says it cannot judge.
 
@@ -30,7 +32,7 @@ People ask "is this serum working?" right when they are about to rebuy. One befo
 - Not offered: a hosted version that accepts anyone's photos. It would put a paid key behind a public endpoint, so we chose a keyless replay instead.
 
 ## Self-score
-Latest panel: R4, 8.1 (see `reviews/R1_panel.md` to `R4_panel.md` for the history, 6.4 to 8.1). Done without API credits in this pass: test count (25), shorter headline, pores decision, fairness limit, review questionnaire, gate-evaluation script. Open: YouTube URL (author), real handheld jitter photos (below), video edits (`submission/VIDEO_SHOTLIST.md`, R4 list), Skin Tone (needs credits).
+Latest panel: R5, 8.3 (history in `reviews/R1_panel.md` to `R5_panel.md`: 6.4, 7.0, 7.7, 8.1, 8.3). This pass (no API credits): headline rewritten to put the measured handheld jitter next to the simulated result, noise-scaling analysis, quality-gate claims aligned to the real-photo test, a framing check between photos, badge specification page, per-face table, Devpost shortened, wider-jitter retakes pre-generated (`tools/make_wide_retakes.py`, local, ignored by git). Open: real handheld retakes scored by the API and Skin Tone (need credits), video edits (`submission/VIDEO_SHOTLIST.md`, R5 list), YouTube description and title (author).
 
 ## Real handheld jitter vs our simulated retakes (measured 2026-10-18, no faces, no API)
 14 handheld photos of a still, faceless object, framed afresh each time (photos not published; numbers in `demo/jitter_measured.json`; `tools/jitter_measure.py`, add `--adjacent` to compare with the previous photo).
@@ -42,6 +44,18 @@ Latest panel: R4, 8.1 (see `reviews/R1_panel.md` to `R4_panel.md` for the histor
 | Brightness change (%) | 0 to 3 | 10.3 / 7.8 | 14.8 / 12.4 |
 Reading: real framing jitter is several times larger than we simulated on every measure, and we simulated no rotation. Caveats: one subject, a feature-matching estimate, and freely re-framed photos (a selfie is framed to put the face at 60 to 80% of the frame, so face-framing jitter in use may be smaller; unknown).
 Can stored API results tell us the error rate under the larger jitter? No. Within the simulated range, a retake's score deviation does not track its zoom, shift or brightness (Spearman 0.0, -0.01 and -0.07 on 29 photos; `tools/jitter_sensitivity.py`), so extrapolating 5 to 10 times beyond that range is not supported, and we ran no new API calls. Honest limit: real handheld noise is probably larger than our simulated noise, so in real use the noise floor is likely wider and the false-alarm figures above may not carry over; the user's own retake gap, which always counts, is what protects them. Rerunning the study with wider jitter needs API credits (pre-registered rule in `tools/HANDHELD_PROTOCOL.md`).
+## What if the noise were larger? (hypothetical, `tools/noise_scaling.mjs`, `demo/noise_scaling.json`)
+Observed score deviations scaled by k (not a measurement; the prior is not scaled, which is the worst case for SkinProof), false "changed" rate averaged over the 4 held-out faces:
+| k | 1-point rule | 3-point rule | SkinProof |
+|---|---|---|---|
+| 1 | 22.9% | 2.0% | 0.1% |
+| 2 | 36.7% | 12.5% | 0.7% |
+| 3 | 46.5% | 22.9% | 2.0% |
+| 5 | 57.3% | 32.5% | 2.3% |
+| 10 | 68.3% | 48.7% | 3.5% |
+A Gaussian Monte Carlo (SD 0.5, 1, 2, 4) gives the same structure: SkinProof's rate also grows (5.6% at SD 4, because two retakes estimate the noise roughly) but far more slowly than the fixed rules. Retakes at the measured wider jitter are pre-generated by `tools/make_wide_retakes.py` for a real rerun when credits arrive.
+New check (unit-tested on synthetic images only, not yet validated on real photos): `estimateShift` warns when two photos of a pair are framed very differently (translation over 12% of the width).
+
 ## Quality gate on real bad phone photos (2026-10-18, no API)
 The author took 14 normal handheld photos of a still object and 10 deliberately bad ones (dark, too bright, blurred). `tools/gate_eval.py`: the original absolute gate (mean brightness, blur at 96 px) passed 14/14 good and rejected 0/10 bad. A phone's auto-exposure largely corrects darkness and brightness, and the blur was mild. `tools/gate_analysis.py` lays the metrics side by side: brightness and contrast do not separate the groups (cross-validated balanced accuracy 0.5 to 0.6; chance 0.5); sharpness measured at 480 px separates them somewhat (0.80 held out; thresholds chosen on half the photos, tested on the other half, 20 repeats); the 96 px sharpness we shipped cannot (0.48).
 Change made: a within-session check. Sharpness depends on the subject, but the ratio between the two photos of one pair does not: if one photo is less than 0.6 of the other's sharpness, the app asks for a retake. On these photos, against the good-photo median, that flags 5 of 10 bad photos and 0 of 14 good ones; two good photos flagged each other 2 times in 91 pairs. It is a warning, not a block.

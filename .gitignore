@@ -3,3 +3,4 @@ node_modules
 *.log
 demo/faceL*.jpg
 demo/fL*_retake_*.jpg
+demo_wide/

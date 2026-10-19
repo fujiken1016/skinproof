@@ -1,6 +1,6 @@
 import { judge, summarize, toMap } from './verdict.js';
 import { NEXT, DISCLAIMER } from './advice.js';
-import { checkPhoto, laplacianVariance, relativeSharpnessIssue } from './quality.js';
+import { checkPhoto, laplacianVariance, relativeSharpnessIssue, estimateShift, framingIssue } from './quality.js';
 const $ = (id) => document.getElementById(id);
 const LS = 'skinproof.v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(LS)) || []; } catch { return []; } };
@@ -61,7 +61,7 @@ fetch('api/info').then((r) => (r.ok ? r.json() : Promise.reject())).then((i) => 
   $('mode').hidden = false; $('mode').textContent = i.mock ? 'Local server, MOCK scores (no API key set)' : 'Local server, live YouCam API'; trialsRender(); })
   .catch(() => { $('s-nolive').hidden = false; $('mode').hidden = false; $('mode').textContent = 'Hosted demo: recorded real YouCam results'; });
 
-let lastSharp = 0; const sharp = {};
+let lastSharp = 0, lastTiny = null; const sharp = {}, tiny = {};
 async function shrink(file) {
   const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
   const s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
@@ -76,6 +76,8 @@ async function shrink(file) {
   const lp = lx.getImageData(0, 0, lg.width, lg.height).data, lgray = new Uint8ClampedArray(lg.width * lg.height);
   for (let i = 0; i < lgray.length; i++) lgray[i] = 0.299 * lp[i * 4] + 0.587 * lp[i * 4 + 1] + 0.114 * lp[i * 4 + 2];
   lastSharp = laplacianVariance(lgray, lg.width, lg.height);
+  const tg = document.createElement('canvas'); tg.width = 48; tg.height = 48; const tx = tg.getContext('2d'); tx.drawImage(c, 0, 0, 48, 48);
+  const tp = tx.getImageData(0, 0, 48, 48).data; lastTiny = new Uint8ClampedArray(48 * 48); for (let i = 0; i < 48 * 48; i++) lastTiny[i] = 0.299 * tp[i * 4] + 0.587 * tp[i * 4 + 1] + 0.114 * tp[i * 4 + 2];
   return c.toDataURL('image/jpeg', 0.9);
 }
 async function analyse(dataUrl) {
@@ -88,10 +90,11 @@ const msg = (p, t, err) => { const m = $(p === 'b' ? 'msg1' : 'msg2'); m.textCon
 function pick(prefix, slots, onChange) {
   slots.forEach((id, i) => $(id).querySelector('input').addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    try { files[id] = await shrink(f); sharp[id] = lastSharp; $(id).classList.add('done'); $(id).querySelector('span').textContent = 'Photo ' + (i + 1) + ' ready'; }
+    try { files[id] = await shrink(f); sharp[id] = lastSharp; tiny[id] = lastTiny; $(id).classList.add('done'); $(id).querySelector('span').textContent = 'Photo ' + (i + 1) + ' ready'; }
     catch (err) { delete files[id]; $(id).classList.remove('done'); msg(prefix, err.message, true); }
     onChange();
     const mate = slots[1 - i]; if (files[id] && files[mate] && sharp[id] && sharp[mate]) { const w = relativeSharpnessIssue(sharp[id], sharp[mate]); if (w) msg(prefix, w, true); }
+    if (files[id] && files[mate] && tiny[id] && tiny[mate]) { const fi = framingIssue(estimateShift(tiny[mate], tiny[id], 48, 48)); if (fi) msg(prefix, fi, true); }
   }));
 }
 const okSave = () => { $('save').disabled = !(files.b0 && files.b1 && $('name').value.trim() && $('consent').checked); };

@@ -1,6 +1,6 @@
 **Tagline:** An error bar for your skin score: YouCam Skin AI that says "no clear change yet" when that is the honest answer.
 
-**In one line:** Average per held-out face, a rule that reports any 1-point move claims a change that never happened 22.9% of the time; SkinProof's rule, 0.1%. Simulated retakes, 4 faces, details in the tables and limits. SkinProof makes no claim that any product works.
+**What we measured:** with small simulated retake jitter (4 held-out faces), a rule that reports any 1-point move claimed a change that never happened 22.9% of the time on average; SkinProof's rule, 0.1%. **What we also measured:** real handheld jitter is several times larger than we simulated, so these two numbers are a best case, not a forecast. SkinProof's defence is that the bar is measured from your own two retakes, so it widens when your photos are less consistent. It makes no claim that any product works.
 
 **YouCam API used:** Skin Analysis (SD, 12 concerns, `format: json`; 14 units per photo per the official docs).
 **Try it:** keyless replay of real recorded results https://fujiken1016.github.io/skinproof/ , shop-page badge demo https://fujiken1016.github.io/skinproof/shop-demo/ , code https://github.com/fujiken1016/skinproof . Your own photos in about 2 minutes: clone, then `node server.js` (Node 22, no install; no key = MOCK scores so you can walk the whole flow; `YOUCAM_API_KEY=... node server.js` = live YouCam). Steps are in the README.
@@ -8,52 +8,70 @@
 
 | Demonstrated | Not demonstrated |
 |---|---|
-| Live YouCam flow end to end; real scores for 12 concerns | Real handheld retakes (none of the public datasets we found had them; protocol and measurement script are in `tools/`) |
-| False-alarm rates on simulated retakes, 4 held-out CC0 faces (plus 3 London Set faces as a supplement) | Any effect of any product on real skin |
-| Verdict logic, quality gate, claims linter, shop badge, consent flow | Sales or return-rate impact (no primary skincare-specific source found, so none stated) |
+| Live YouCam flow end to end; real scores for 12 concerns | Real handheld retakes scored by the API (none of the public datasets we found had them; credits ran out) |
+| False-alarm rates on simulated retakes, 4 held-out CC0 faces | Any effect of any product on real skin |
+| Measured on real handheld photos, no API: framing jitter (14 photos of a still object) and quality-gate behaviour (14 normal, 10 bad photos) | Sales or return-rate impact (no primary skincare-specific source found, so none stated) |
+| Verdict logic, quality checks, claims linter, shop badge, consent flow | |
 
 ## Quality of Idea
 Right before you rebuy a serum you ask: is this actually working? One before/after selfie cannot answer that, because in our tests two photos of the same face already score differently. SkinProof takes two back-to-back photos at baseline and two at follow-up, measures the gap between the two retakes (the noise), and reports a score as risen or fallen only if the change exceeds twice that noise. Otherwise it says **"no clear change yet"**. If retakes disagree wildly it says it cannot judge.
-Unlike a tracker that subtracts two scores, it will not report a difference smaller than its own noise. And the noise is not the same for everyone: with a fixed 3-point rule, acne was a false alarm 43.7% of the time on one face (the face the prior was fitted on; SkinProof 1.9%), and firmness 16.7% on the other faces (SkinProof 0%). The jumpy score differs by person, so the bar has to be measured per person and per score.
+Unlike a tracker that subtracts two scores, it will not report a difference smaller than its own noise. The noise differs by person and by score: with a fixed 3-point rule, acne was a false alarm 43.7% of the time on one face (the face the prior was fitted on; SkinProof 1.9%), and firmness 16.7% on the other faces (SkinProof 0%).
 
 ## Technological Implementation
 - Flow: `POST /s2s/v2.0/file`, `PUT` to the pre-signed URL, `POST /s2s/v2.0/task/skin-analysis` (12 SD concerns), poll the task, read `raw_score`. The key stays on the server; the hosted page has no key.
-- Quirks we hit and handle: `all`, `skin_age`, `resize_image` entries carry no `raw_score`; `error_large_face_angle`, `error_src_face_too_small`, `error_src_face_out_of_bound` reject photos (not charged), so the app guides framing.
-- Pure, unit-tested decision logic (`verdict.js`, 25 tests across 3 files) plus a claims linter that fails the build on medical, ingredient or efficacy wording in all user-facing files; CI runs both.
-- Internal noise test: real-API scores of one CC0 portrait (8 photos) plus 4 more CC0 portraits as held-out faces. "Retakes" are simulated (shift, zoom, exposure, noise, JPEG; no rotation or perspective change). The face, not the comparison, is the unit (comparisons inside a face overlap). Per held-out CC0 face, average (range): any-1-point rule 22.9% (14.6 to 27.8), 3-point rule 2.0% (0 to 4.4), SkinProof 0.1% (0 to 0.6). Adding 3 people from a CC BY 4.0 research set as a secondary supplement (7 faces, bootstrap over faces): 22.2% (17.3 to 27.2), 2.3% (0.9 to 3.9), 0.5% (0 to 1.3). On the face the prior was fitted on: 17.1%, 8.1%, 0.4% (in-sample). Seven or eight people and simulated retakes: read it as "much lower false alarms in our test", not an accuracy claim.
-- Pores, a decision we made: pores had the highest false-alarm rate, so pores now get a higher minimum noise (3 points instead of 2; `tools/pores_tradeoff.mjs`). On the fitted face pore false alarms fell from 6.7% to 2.4% (0% on the other faces either way). The cost is power: a red-cast shift of 4.7 pore points, which was a verdict before, is now shown as "close to the line". In the red-cast demo only Redness gets a verdict; Pores moves too (a colour cast changes how pores read) but stays below it.
-- Quality gate (`src/quality.js`, pure functions, tested): checks size and exposure in the browser before a photo is sent, plus a within-session blur check (if one photo of a pair is under 0.6 of the other's sharpness, it asks for a retake). Measured on real phone photos, see Limits. Verdicts also carry a margin and a confidence tier (confident, borderline, clearly inside noise, cannot judge); borderline rows show "close to the line".
+- Quirks we hit and handle: `all`, `skin_age`, `resize_image` entries carry no `raw_score`; `error_large_face_angle`, `error_src_face_too_small`, `error_src_face_out_of_bound` reject photos (not charged).
+- Pure, unit-tested decision logic (`verdict.js`, 29 tests across 3 files) plus a claims linter that fails the build on medical, ingredient or efficacy wording in all user-facing files; CI runs both.
+- Internal noise test (real API scores, simulated retakes: shift, zoom, exposure, noise, JPEG; no rotation): one CC0 portrait (8 photos) plus 4 more CC0 faces as held-out faces. The face is the unit. Per held-out face:
+
+| Held-out face | Photos | 1-point rule | 3-point rule | SkinProof |
+|---|---|---|---|---|
+| 1 | 5 | 26.1% | 4.4% | 0.6% |
+| 2 | 4 | 27.8% | 0% | 0% |
+| 3 | 6 | 23.1% | 3.0% | 0% |
+| 4 | 6 | 14.6% | 0.6% | 0% |
+| Average | | 22.9% | 2.0% | 0.1% |
+
+  n = 4 faces, so the range is the honest summary; do not read 0.1% as a rate. On the face the prior was fitted on: 17.1%, 8.1%, 0.4% (in-sample). A CC BY 4.0 research set added a secondary check, reported in the README only.
+- What if noise were larger? A hypothetical scaling of the observed score deviations (not a measurement; `tools/noise_scaling.mjs`): at 3x noise the 1-point rule's false alarms rise to 46.5%, the 3-point rule's to 22.9%, SkinProof's to 2.0%; at 10x, 68.3%, 48.7%, 3.5%. A Gaussian simulation agrees on the structure: SkinProof also degrades with noise (5.6% at SD 4) but much more slowly, because its bar grows with the retake gap.
+- Pores, a decision we made: pores now get a higher minimum noise (3 points instead of 2; `tools/pores_tradeoff.mjs`): on the fitted face, pore false alarms fell from 6.7% to 2.4%, at the cost of some power (a red-cast shift of 4.7 pore points is now "close to the line").
+- Quality checks (`src/quality.js`, pure functions, tested). Size and exposure are checked in the browser before a photo is sent, but real failed photos usually pass these because phone auto-exposure corrects them: on 10 deliberately bad phone photos the shipped absolute gate rejected 0 of 10 (and passed 14 of 14 normal photos). A within-session sharpness ratio (one photo under 0.6 of its pair's sharpness) catches about 5 of 10 bad photos with 0 of 14 good ones flagged (thresholds chosen on half the photos, tested on the other half). A translation check warns when the two photos of a pair are framed very differently (unit-tested on synthetic images, not yet validated on real photos). Verdicts also carry a confidence tier (confident, borderline, clearly inside noise, cannot judge).
 - Cost: one check is 4 photos = 56 units (14 per photo). 43 successful analyses (about 600 units) went into the whole project.
 
 ## Design
-One flow: consent, two photos, baseline, re-check, verdict. "No clear change" is a designed result, not an error. Verdicts use icons and text, not colour alone; 48px targets; 375px layout; dark mode. A shop-page badge shows the same logic as an embeddable widget.
+One flow: consent, two photos, baseline, re-check, verdict. "No clear change" is a designed result, not an error. Verdicts use icons and text, not colour alone; 48px targets; 375px layout; dark mode. A shop-page badge shows the same logic as an embeddable widget, with a specification page for a shop's reviewer (three states, wording rules).
 
 ## Potential Impact
 **Who:** a shopper about to rebuy a skincare product, and the shop that shows before/after photos.
-**A use scene (illustrative, not a real person):** Mina has used a serum for three weeks and has one before photo and one after photo. They look slightly different, and the shop's page shows a dramatic before/after. She takes two photos now and two more in the same light. SkinProof says: "No clear change beyond noise. Re-check in two weeks." She waits instead of rebuying on a hunch.
-**Why shops care:** advertising regulators already ask before/after images to be honest. The UK ASA says advertisers should hold proof that before-and-after photos are genuine and have not been manipulated, and the photos should not exaggerate the efficacy of the product; it cites a ruling where the advertiser lacked evidence that the images were representative of the effect consumers could likely expect (https://www.asa.org.uk/advice-online/before-and-after-photos.html, opened 2026-10-18). The US FTC says that when endorsers' results are atypical, the ad must make clear what results are generally expected (https://consumer.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking). Japan's Consumer Affairs Agency covers misleading quality claims and substantiation (https://www.caa.go.jp/policies/policy/representation/fair_labeling/representation_regulation; it does not name before/after photos, so this is a general principle).
+**Two readers, both illustrative (not real people):** Mina, three weeks into a serum with one before and one after photo; she takes two photos now and two more in the same light, SkinProof says "No clear change beyond noise. Re-check in two weeks", and she waits instead of rebuying on a hunch. And a shop's compliance reviewer who must decide whether a before/after image can sit next to a product; the badge gives a number with its noise attached. No expert has reviewed SkinProof; we quote nobody.
+**Why shops care:** advertising regulators already ask before/after images to be honest. The UK ASA says advertisers should hold proof that before-and-after photos are genuine and have not been manipulated, and the photos should not exaggerate the efficacy of the product (https://www.asa.org.uk/advice-online/before-and-after-photos.html, opened 2026-10-18). The US FTC says that when endorsers' results are atypical, the ad must make clear what results are generally expected (https://consumer.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking). Japan's Consumer Affairs Agency covers misleading quality claims and substantiation (https://www.caa.go.jp/policies/policy/representation/fair_labeling/representation_regulation; no explicit mention of before/after photos, so a general principle).
 
 | Regulator idea | What SkinProof does |
 |---|---|
-| Photos genuine, not manipulated (ASA) | Works on the photos you give it and measures them; it does not detect manipulation, and says nothing about whether a photo is genuine |
+| Photos genuine, not manipulated (ASA) | Measures the photos you give it; it does not detect manipulation |
 | Show what results to expect (FTC) | Reports whether a score change is beyond measurement noise; the badge never says a product works |
 | Do not exaggerate efficacy (ASA) | Banned words are enforced by a build-time linter |
 
-**Two readers, both illustrative (not real people):** a shopper, Mina, three weeks into a serum with one before and one after photo; and a shop's compliance reviewer who has to decide whether a before/after image can sit next to a product. The badge gives the reviewer a number with its noise attached. No expert has reviewed SkinProof; we have not quoted one. Perfect Corp's own page says its Skin Analysis scores 15 skin metrics on a 0-100 scale (https://www.perfectcorp.com/business/products/ai-skin-analysis); SkinProof uses 12 of them. The demo badge (https://fujiken1016.github.io/skinproof/shop-demo/) is about 10 lines to embed.
-**Cost for a shop:** one badge = 4 photos = 56 units at 14 per photo (the USD price per unit is on Perfect Corp's pricing page, which we could not read automatically, so we state units only).
+Perfect Corp's own page says its Skin Analysis scores 15 skin metrics on a 0-100 scale (https://www.perfectcorp.com/business/products/ai-skin-analysis); SkinProof uses 12. Cost for a shop: one badge = 4 photos = 56 units (the USD price per unit is not stated in the docs we could read, so we state units only).
 
 ## Limits (read these)
 - Cosmetic self-tracking, not a medical device; it cannot diagnose. Photos are sent to YouCam (Perfect Corp) for analysis; SkinProof does not store them; YouCam's retention follows its own policy; the app asks for consent first.
-- Simulated retakes only. We searched for a public dataset with real same-session retakes of the same person under a license that allows commercial and research use (Face Research Lab London Set, Chicago Face Database, FEI, CaNAFF, MUCT, Caltech Faces, Wikimedia Commons and others). None qualified: the only clearly licensed one (London Set, CC BY 4.0) has one neutral photo per person, and the rest are research-only or unverifiable. Our own face photos were deliberately not used. Real handheld retakes remain untested with the API. We did measure real handheld jitter on a faceless object (no API): it is several times larger than our simulated jitter (shift, zoom, rotation and brightness), so our simulated noise probably understates real noise (see Next).
-- Demo follow-ups are simulated edits of a CC0 photo and imply nothing about the person shown. London Set faces (CC BY 4.0) were sent to YouCam for scoring and are not redistributed; the participants' consent text covers research and media use, which may be narrower than a commercial API call, so these results are secondary and the headline numbers use CC0 faces only.
-- The demo's baseline and follow-up photos were taken on the same day; the screen says so. A real follow-up should wait two weeks or more.
-- Fairness: the 8 faces are not a representative sample of skin tones or ages, so the noise prior may not transfer; we did not label skin tones. The bar is measured per person (your own retake gap always counts and can only raise the bar). Skin Tone Analysis is not used.
-- Review: we prepared a 3-question review request for a skincare professional (`tools/EXPERT_REVIEW_QUESTIONS.md`); none has been received, and we quote nobody.
-- Quality gate, tested on real bad photos (14 normal and 10 deliberately dark, bright or blurred handheld photos of a still object, no API): the original absolute gate rejected 0 of 10, because phone auto-exposure corrects darkness and brightness and the blur was mild. A within-session sharpness ratio (cross-checked: thresholds chosen on half, tested on the other half) catches about 5 of 10 bad photos with 0 of 14 good ones flagged. So real failed photos can pass the gate; it is a helper, not a promise. One object, one phone, 24 photos. The gate scene in the video uses synthetic dark and blurry photos.
-- The noise prior is a rough guide fitted on simulated retakes; your own retake gap always counts.
+- Simulated retakes only for the false-alarm figures. Real handheld jitter, measured on 14 photos of a still object (no API, numbers only):
+
+| Measure | Simulated | Real handheld, vs first photo (p95) | vs previous photo (p95) |
+|---|---|---|---|
+| Shift (% of width) | about 3 | 24 | 30 |
+| Zoom (%) | 3 | 23 | 15 |
+| Rotation (degrees) | 0 | 5 | 10 |
+| Brightness (%) | 3 | 8 | 12 |
+
+  So real noise is probably larger than simulated and the figures above may not carry over; we could not convert this into an error rate without new API credits (within the simulated range the scores did not track the jitter). One object, one phone, one feature-matching method. Retakes at wider jitter are pre-generated for when credits arrive.
+- No public dataset with real same-session retakes under a commercial-and-research license qualified (London Set, Chicago, FEI, CaNAFF, MUCT, Caltech, Wikimedia Commons and others checked). Our own face photos were deliberately not used.
+- Demo follow-ups are simulated edits of a CC0 photo and imply nothing about the person shown. The demo's two photo sets were taken on the same day; the screen says so. A real follow-up should wait two weeks or more. The gate scene in the video uses synthetic dark and blurry photos.
+- Fairness: the 8 faces we scored are not a representative sample of skin tones or ages and we did not label skin tones, so the noise prior may not transfer. The bar is measured per person (your own retake gap always counts and can only raise the bar). Skin Tone Analysis is not used.
+- Review: a 3-question review request for a skincare professional is prepared (`tools/EXPERT_REVIEW_QUESTIONS.md`); none has been received.
 
 ## Next, and why it is not here
-- Skin Tone Analysis to widen the bar in hard light: not built because the free API credits were used up on the validation study; the browser quality gate (exposure, blur, size) is the credit-free step in that direction.
-- Real handheld retakes with consented volunteers: not done because it needs consent and time; instead a faceless handheld-jitter measurement (`tools/HANDHELD_PROTOCOL.md`, `tools/jitter_measure.py`, `tools/gate_eval.py`) checks whether our simulated jitter covers real jitter. Result (14 handheld photos of a still object, 2026-10-18): real jitter is several times larger than we simulated on every measure (shift p95 about 24 to 30% of width vs about 3% simulated; zoom p95 15 to 23% vs 3%; rotation p95 5 to 10 degrees vs none; brightness p95 8 to 12% vs 3%). We could not turn that into an error rate without new API credits, because within the simulated range the scores did not track the jitter parameters. Honest reading: real handheld noise is probably larger than our simulated noise, the noise floor in real use is likely wider, and our false-alarm figures may not carry over; your own retake gap always counts. Numbers only; the photos are not published.
+- Re-running the study at the measured, wider jitter and Skin Tone Analysis: not here because the free API credits ran out; the wider retakes are generated and waiting.
+- Real handheld retakes with consented volunteers: not here because it needs consent and time.
 
 Built with: YouCam Skin Analysis API, Node 22 (no dependencies), vanilla JS, GitHub Pages. Photo credits in `demo/CREDITS.md`.

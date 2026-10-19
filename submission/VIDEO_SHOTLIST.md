@@ -57,3 +57,11 @@ Open on a concrete problem line within 2 s; burned-in captions with one big head
 8. Test count if shown: 25.
 
 Note (2026-10-18): the quality-gate scene must say it uses synthetic dark and blurry photos, because real phone photos mostly passed the brightness gate (README, gate section). Show the new within-session blur warning with a blurry pair if you can.
+
+## R5 list for the video owner (voice and screen text; re-upload gives a new URL, update the Devpost Video field)
+1. 0:00 voice: "In our simulated test, a naive tracker's false alarms were almost one in four; SkinProof's were nearly zero. Real handheld photos wobble more, so SkinProof measures your own noise." Keep the chip "SIMULATED RETAKES, 4 HELD-OUT FACES".
+2. Quality gate scene (0:22 to 0:30): replace "dark or blurry photos never reach YouCam". New voice: "The browser checks size and exposure, and compares the sharpness of your two photos. In our real-photo test it caught about half of the blurry ones; it is a helper, not a promise." Add the chip "SYNTHETIC EXAMPLE". Better: record, with no API, your own faceless blurry pair showing the "much less sharp" warning, and a pair framed very differently showing the framing warning.
+3. "Weeks later" becomes "Three weeks later" to match the TIME SKIP chip.
+4. Listen through once; regenerate only the awkward lines (REDO). A human voice replaces `audio.wav`.
+5. Scan the end-card QR codes with a phone (Source = GitHub, Demo = Pages). Look at the shop-demo tiles in the YouTube playback for any cut-off.
+6. YouTube page (author, 5 minutes, no re-upload): title "SkinProof: an error bar for your skin score (YouCam Skin Analysis API)"; description with a one-line summary, the API used (Skin Analysis, 12 concerns), demo, repo and shop-demo URLs, "Follow-ups in the demo are simulated edits of a CC0 photo; retakes in our test are simulated; real handheld jitter is larger. Cosmetic tracking, not a medical device.", and chapters. Check the visibility the Devpost rules require (public).

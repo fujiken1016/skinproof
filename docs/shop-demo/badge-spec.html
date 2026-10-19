@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SkinProof badge specification</title>
+<style>:root{--bg:#faf8f5;--fg:#201c18;--mut:#5b534b;--card:#fff;--line:#e2dbd2;--acc:#1b6a50}@media(prefers-color-scheme:dark){:root{--bg:#161412;--fg:#f1ece6;--mut:#b5aca2;--card:#1f1c19;--line:#352f2a;--acc:#6fd3a8}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}main{max-width:720px;margin:0 auto;padding:16px 16px 48px}h1{font-size:26px}h2{font-size:18px;margin-top:28px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card)}td,th{padding:8px;border:1px solid var(--line);text-align:left;vertical-align:top}code{font:13px ui-monospace,monospace;overflow-wrap:anywhere}a{color:var(--acc)}.note{font-size:14px;color:var(--mut)}</style></head>
+<body><main>
+<h1>SkinProof measurement badge: specification for a shop's reviewer</h1>
+<p class="note">A badge describes how a measured score changed between a brand's own before and after photos, compared with measurement noise. It is not a statement about a product. Fictional example, not legal advice.</p>
+<h2>Three states</h2>
+<table><tr><th>State</th><th>When</th><th>Allowed text</th></tr>
+<tr><td>Beyond noise</td><td>at least one score changed by more than twice the noise measured from the two retakes</td><td>"N of 12 scores moved beyond measurement noise"</td></tr>
+<tr><td>No clear change</td><td>every change is inside the noise bar</td><td>"No clear change beyond measurement noise"</td></tr>
+<tr><td>Cannot judge</td><td>the two retakes of a pair disagree too much, or too few scores</td><td>"Retakes disagree; cannot judge"</td></tr></table>
+<h2>Wording rules</h2>
+<table><tr><th>Use</th><th>Do not use</th></tr>
+<tr><td>Describe scores and measurement ("moved", "beyond noise", "no clear change")</td><td>Any outcome claim about skin or about the product's effect</td></tr>
+<tr><td>State that retakes and framing affect scores</td><td>Any ingredient name next to a result</td></tr>
+<tr><td>Show the photos exactly as supplied by the brand</td><td>Retouched or substituted photos (the badge cannot detect them)</td></tr></table>
+<p>The banned-word lists are the regular expressions in <a href="https://github.com/fujiken1016/skinproof/blob/main/test/claims.test.js"><code>test/claims.test.js</code></a>; the build fails if user-facing text matches them.</p>
+<h2>What a reviewer should ask the brand</h2>
+<ol><li>Were baseline and follow-up photos taken in the same light, distance and pose, two photos each?</li><li>Is the interval stated (two weeks or more)?</li><li>Were the photos unretouched?</li></ol>
+<p><a href="./">Back to the shop demo</a></p>
+</main></body></html>

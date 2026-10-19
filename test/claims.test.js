@@ -8,7 +8,7 @@ export const INGREDIENT = /\b(retino(id|ids|l)|azelaic|salicylic|niacinamide|vit
 export const EFFICACY = /\b(help(s|ed)?|improv(e|es|ed)? your skin|reduce[sd]?|fix(es)?|clear(s|ed)? (your )?(acne|skin)|erase[sd]?|anti-?aging)\b/i;
 // lines that are *disclaimers* or describe scores, not skin outcomes
 const SAFE = /(cannot diagnose|not a medical|not a diagnosis|not proof|no medical|not evidence|not a claim|makes no claim|no claims? about)/i;
-const FILES = ['public/index.html', 'public/app.js', 'public/shop-demo/index.html', 'src/advice.js', 'src/verdict.js', 'README.md', 'submission/DEVPOST.md'];
+const FILES = ['public/index.html', 'public/app.js', 'public/shop-demo/index.html', 'public/shop-demo/badge-spec.html', 'src/advice.js', 'src/verdict.js', 'README.md', 'submission/DEVPOST.md'];
 export function violations(text) {
   const out = [];
   for (const [i, line] of text.split('\n').entries()) {
